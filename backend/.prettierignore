@@ -1,4 +1,1 @@
-node_modules/
-dist/
-bin/
-pnpm-lock.yaml
+dist
