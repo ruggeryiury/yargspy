@@ -1,5 +1,6 @@
 import z from 'zod'
 
+import { YARGSPY } from '../constants'
 import { serializedObjectId } from './globals'
 
 export const userDocument = z.object({
@@ -35,7 +36,7 @@ export const adminLogDocument = z.object({
 	 * ScoreDelete: 5
 	 * UserUpdate: 6
 	 */
-	action: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6)]),
+	action: z.enum(YARGSPY.AdminLogAction),
 	item: serializedObjectId, // ObjectID for any table
 	reason: z.string().nonempty().optional(),
 	createdAt: z.iso.datetime(),
@@ -49,7 +50,7 @@ export const emailTokenDocument = z.object({
 	 * Verify: 0
 	 * Reset: 1
 	 */
-	purpose: z.union([z.literal(0), z.literal(1)]),
+	purpose: z.enum(YARGSPY.EmailTokenPurpose),
 	tokenHash: z.hash('sha256'),
 	usedAt: z.iso.datetime().optional(),
 	expiresAt: z.iso.datetime(),
@@ -61,7 +62,7 @@ export const scoreDocument = z.object({
 	song: serializedObjectId,
 	uploader: serializedObjectId,
 	replayPath: z.string(),
-	replayFileHash: z.hash('sha1'),
+	replayFileHash: z.hash('sha256'),
 	childrenScores: z.array(serializedObjectId),
 	/*
   v0_13_1: 0,
@@ -69,7 +70,7 @@ export const scoreDocument = z.object({
   v0_14: 2,
   v0_15: 3,
   */
-	version: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
+	version: z.enum(YARGSPY.GameVersion),
 	hidden: z.boolean(),
 	/*
   // Instruments are reserved in multiples of 10
@@ -103,7 +104,7 @@ export const scoreDocument = z.object({
   // DjDouble: 51,
   Band: 255, // byte.MaxValue
   */
-	instrument: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(10), z.literal(11), z.literal(12), z.literal(13), z.literal(20), z.literal(21), z.literal(22), z.literal(23), z.literal(30), z.literal(31), z.literal(32), z.literal(33), z.literal(34), z.literal(40), z.literal(41), z.literal(255)]),
+	instrument: z.enum(YARGSPY.Instrument),
 	/*
   // Game modes are reserved in multiples of 5
   // 0-4: Guitar
@@ -125,7 +126,7 @@ export const scoreDocument = z.object({
   // 20-24: Other
   // Dj = 20,
   */
-	gamemode: z.union([z.literal(0), z.literal(1), z.literal(5), z.literal(6), z.literal(7), z.literal(10), z.literal(11), z.literal(15)]),
+	gamemode: z.enum(YARGSPY.GameMode).optional(),
 	/*
   Beginner: 0,
   Easy: 1,
@@ -134,13 +135,13 @@ export const scoreDocument = z.object({
   Expert: 4,
   ExpertPlus: 5,
   */
-	difficulty: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
+	difficulty: z.enum(YARGSPY.Difficulty).optional(),
 	/*
   Default: 0,
   Casual: 1,
   Precision: 2,
   */
-	engine: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+	engine: z.enum(YARGSPY.Engine).optional(),
 	/*
   AllStrums: 0,
   AllHopos: 1,
@@ -154,7 +155,7 @@ export const scoreDocument = z.object({
   NoVocalPercussion: 9,
   RangeCompress: 10,
   */
-	modifiers: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9), z.literal(10)]),
+	modifiers: z.array(z.enum(YARGSPY.Modifier)),
 	songSpeed: z.number(),
 	createdAt: z.iso.datetime(),
 	profileName: z.string().optional(),
@@ -185,6 +186,8 @@ export const songDocument = z.object({
 	artistSearch: z.string(),
 	artistSort: z.string(),
 	charter: z.string().optional(),
+	charterSearch: z.string().optional(),
+	charterSort: z.string().optional(),
 	album: z.string().optional(),
 	albumSearch: z.string().optional(),
 	albumSort: z.string().optional(),

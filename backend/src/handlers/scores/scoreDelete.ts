@@ -1,4 +1,5 @@
 import fp from 'fastify-plugin'
+import type z from 'zod'
 
 import { type GenericIdParams, type ScoreDeleteQuerystring, genericIdParams, scoreDeleteQuerystring, scoreDeleteSuccessData } from '@schemas'
 
@@ -9,7 +10,7 @@ import { Swagger } from '../../core/services/Swagger'
 
 export const scoreDelete = fp(async (fastify) => {
 	fastify.delete<{ Params: GenericIdParams; Querystring: ScoreDeleteQuerystring }>(
-		'/api/v1/scores/:id',
+		'/v1/scores/:id',
 		{
 			schema: {
 				tags: ['Scores'],
@@ -21,8 +22,8 @@ export const scoreDelete = fp(async (fastify) => {
 					404: Swagger.replySchema('not_found').describe('Score not found using the provided ID'),
 					422: Swagger.replySchema('validation_error').describe('No reason provided, wrong entry ID format'),
 				},
-				body: scoreDeleteQuerystring,
 				params: genericIdParams,
+				querystring: scoreDeleteQuerystring,
 				security: [
 					{
 						bearerAuth: [],
@@ -55,14 +56,14 @@ export const scoreDelete = fp(async (fastify) => {
 				fastify.db.adminLogs.insertOne({
 					_id: new fastify.mongo.ObjectId(),
 					admin: req.userDocument._id,
-					action: YARGSPY.AdminAction.ScoreDelete,
+					action: YARGSPY.AdminLogAction.ScoreDelete,
 					item: new fastify.mongo.ObjectId(scoreId),
 					createdAt: new Date(),
 					reason,
 				})
 			})
 
-			return success(req, reply, { code: 'ok_delete_entry', data: { count: result.deletedCount } })
+			return success<z.infer<typeof scoreDeleteSuccessData.shape.data>>(req, reply, { code: 'ok_delete_entry', data: { count: result.deletedCount } })
 		},
 	)
 })

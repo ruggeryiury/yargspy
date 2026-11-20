@@ -84,7 +84,7 @@ export const YARGSPY = {
 		v0_14: 2,
 		v0_15: 3,
 	},
-	AdminAction: {
+	AdminLogAction: {
 		UserBan: 0,
 		UserUnban: 1,
 		SongAdd: 2,
@@ -93,8 +93,13 @@ export const YARGSPY = {
 		ScoreDelete: 5,
 		UserUpdate: 6,
 	},
-	UserTokenPurpose: {
+	EmailTokenPurpose: {
 		Verify: 0,
 		Reset: 1,
+	},
+	UserResolver: {
+		ID: 0,
+		Username: 1,
+		Email: 2,
 	},
 } as const

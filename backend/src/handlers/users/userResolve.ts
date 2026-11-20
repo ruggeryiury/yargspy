@@ -1,15 +1,16 @@
 import fp from 'fastify-plugin'
 import type z from 'zod'
 
-import { type UserResolveBody, userResolveBody, userResolveSuccessData } from '@schemas'
+import { type UserResolveQuerystring, userResolveQuerystring, userResolveSuccessData } from '@schemas'
 
+import { YARGSPY } from '../../constants'
 import type { UserModel } from '../../core/services/Database'
 import { ServerError, success } from '../../core/services/ServerResponse'
 import { Swagger } from '../../core/services/Swagger'
 
 export const userResolve = fp(async (app) => {
-	app.post<{ Body: UserResolveBody }>(
-		'/api/v1/users/resolve',
+	app.get<{ Querystring: UserResolveQuerystring }>(
+		'/v1/users/resolve',
 		{
 			schema: {
 				tags: ['Users'],
@@ -19,22 +20,23 @@ export const userResolve = fp(async (app) => {
 					404: Swagger.replySchema('not_found').describe('No user found using the provided parameters'),
 					422: Swagger.replySchema('validation_error').describe('Request body with validation errors'),
 				},
-				body: userResolveBody,
+				querystring: userResolveQuerystring,
 			},
 		},
 		async (req, reply) => {
-			const { input, output, value } = req.body
+			const { input, output, value } = req.query
 
 			let user: UserModel | null
 
 			switch (input) {
-				case 'email':
+				case YARGSPY.UserResolver.Email:
 					user = await app.dbFuncs.users.findByEmail(value)
 					break
-				case 'id':
+				case YARGSPY.UserResolver.ID:
+				default:
 					user = await app.dbFuncs.users.findById(value)
 					break
-				case 'username':
+				case YARGSPY.UserResolver.Username:
 					user = await app.dbFuncs.users.findByUsername(value)
 					break
 			}
@@ -44,13 +46,14 @@ export const userResolve = fp(async (app) => {
 			let outputValue: string
 
 			switch (output) {
-				case 'email':
+				case YARGSPY.UserResolver.Email:
 					outputValue = user.email
 					break
-				case 'id':
+				case YARGSPY.UserResolver.ID:
 					outputValue = user._id.toHexString()
 					break
-				case 'username':
+				case YARGSPY.UserResolver.Username:
+				default:
 					outputValue = user.username
 					break
 			}

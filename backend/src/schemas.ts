@@ -7,8 +7,9 @@ export * from './schemas/admin/adminEntries.schemas'
 
 export * from './schemas/scores/scoreDelete.schemas'
 
+export * from './schemas/songs/getLeaderboards.schemas'
 export * from './schemas/songs/getSongDetails.schemas'
-export * from './schemas/songs/patchSongEntry.schemas'
+export * from './schemas/songs/songUpdate.schemas'
 export * from './schemas/songs/songDelete.schemas'
 export * from './schemas/songs/songResolve.schemas'
 

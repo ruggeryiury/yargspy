@@ -47,9 +47,7 @@ export const searchAndSortUpdate001 = async (app: FastifyInstance) => {
 	}
 
 	const songOperations: AnyBulkWriteOperation<SongModel>[] = []
-	const songCursor = app.db.songs.find({
-		$or: [{ nameSearch: { $exists: false } }, { nameSort: { $exists: false } }, { artistSearch: { $exists: false } }, { artistSort: { $exists: false } }, { albumSearch: { $exists: false } }, { album: { $exists: false } }],
-	})
+	const songCursor = app.db.songs.find({ $or: [{ nameSearch: { $exists: false } }, { nameSort: { $exists: false } }, { charterSearch: { $exists: false }, charter: { $exists: true } }, { charterSort: { $exists: false }, charter: { $exists: true } }, { artistSearch: { $exists: false } }, { artistSort: { $exists: false } }, { albumSearch: { $exists: false }, album: { $exists: true } }, { albumSort: { $exists: false }, album: { $exists: true } }] })
 
 	for await (const song of songCursor) {
 		songOperations.push({
@@ -61,6 +59,8 @@ export const searchAndSortUpdate001 = async (app: FastifyInstance) => {
 						nameSort: leadingArticleToTrailing(normalizeStr(song.name)),
 						artistSearch: normalizeStr(song.artist),
 						artistSort: leadingArticleToTrailing(normalizeStr(song.artist)),
+						charterSearch: song.charter ? normalizeStr(song.charter) : undefined,
+						charterSort: song.charter ? leadingArticleToTrailing(normalizeStr(song.charter)) : undefined,
 						albumSearch: song.album ? normalizeStr(song.album) : undefined,
 						albumSort: song.album ? leadingArticleToTrailing(normalizeStr(song.album)) : undefined,
 					},

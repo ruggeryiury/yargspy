@@ -6,7 +6,7 @@ import { success } from '../../core/services/ServerResponse'
 
 export const userEntries = fp(async (app) => {
 	app.post<{ Querystring: UserEntriesQuerystring }>(
-		'/api/v1/users/entries',
+		'/v1/users/entries',
 		{
 			schema: {
 				tags: ['Users'],

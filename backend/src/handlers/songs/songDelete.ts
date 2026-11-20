@@ -9,7 +9,7 @@ import { Swagger } from '../../core/services/Swagger'
 
 export const songDelete = fp(async (fastify) => {
 	fastify.delete<{ Params: GenericIdParams; Querystring: SongDeleteQuerystring }>(
-		'/api/v1/songs/:id',
+		'/v1/songs/:id',
 		{
 			schema: {
 				tags: ['Songs'],
@@ -55,7 +55,7 @@ export const songDelete = fp(async (fastify) => {
 			fastify.db.adminLogs.insertOne({
 				_id: new fastify.mongo.ObjectId(),
 				admin: req.userDocument._id,
-				action: YARGSPY.AdminAction.SongDelete,
+				action: YARGSPY.AdminLogAction.SongDelete,
 				item: new fastify.mongo.ObjectId(songId),
 				createdAt: new Date(),
 				reason,

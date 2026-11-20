@@ -18,7 +18,6 @@ export const stripSurroundingQuotes = (value: string): string => {
 	return value
 }
 
-
 /**
  * Replaces `{{key}}` placeholders in a string with values from an object.
  *

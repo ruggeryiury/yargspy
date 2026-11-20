@@ -1,4 +1,5 @@
 import fp from 'fastify-plugin'
+import z from 'zod'
 
 import { type GenericIdParams, type PatchUserStatusBody, genericIdParams, patchUserStatusBody, patchUserStatusSuccessData } from '@schemas'
 
@@ -9,7 +10,7 @@ import { Swagger } from '../../core/services/Swagger'
 
 export const patchUserStatus = fp(async (app) => {
 	app.patch<{ Body: PatchUserStatusBody; Params: GenericIdParams }>(
-		'/api/v1/users/:id/status',
+		'/v1/users/:id/status',
 		{
 			schema: {
 				tags: ['Users'],
@@ -51,14 +52,14 @@ export const patchUserStatus = fp(async (app) => {
 
 			await app.db.adminLogs.insertOne({
 				_id: new app.mongo.ObjectId(),
-				action: active ? YARGSPY.AdminAction.UserUnban : YARGSPY.AdminAction.UserBan,
+				action: active ? YARGSPY.AdminLogAction.UserUnban : YARGSPY.AdminLogAction.UserBan,
 				admin: req.userDocument._id,
 				createdAt: new Date(),
 				item: user._id,
 				reason,
 			})
 
-			return success(req, reply, {
+			return success<z.infer<typeof patchUserStatusSuccessData.shape.data>>(req, reply, {
 				code: 'ok',
 				data: {
 					user: id,

@@ -1,3 +1,5 @@
+import type { LiteralUnion } from 'type-fest'
+
 /**
  * Returns the key from a `value` that exists inside on a `map`.
  *
@@ -8,12 +10,12 @@
  * @param {unknown} value A value that exists on provided map.
  * @returns {keyof T | null}
  */
-export const getKeyFromMapValue = <T extends Record<string, unknown>>(map: T, value: T[keyof T]): keyof T | null => {
+export const getKeyFromMapValue = <T extends Record<string, unknown>>(map: T, value: LiteralUnion<T[keyof T], number>): keyof T | false => {
 	const keys = Object.keys(map) as (keyof T)[]
 
 	for (const key of keys) {
 		if (map[key] === value) return key
 	}
 
-	return null
+	return false
 }

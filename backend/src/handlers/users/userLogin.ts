@@ -1,4 +1,5 @@
 import fp from 'fastify-plugin'
+import z from 'zod'
 
 import { type UserLoginBody, userLoginBody, userLoginSuccessData } from '@schemas'
 
@@ -7,7 +8,7 @@ import { Swagger } from '../../core/services/Swagger'
 
 export const userLogin = fp(async (fastify) => {
 	fastify.post<{ Body: UserLoginBody }>(
-		'/api/v1/users/login',
+		'/v1/users/login',
 		{
 			schema: {
 				tags: ['Login/Register'],
@@ -37,7 +38,7 @@ export const userLogin = fp(async (fastify) => {
 			// Sign a valid token to be used on subsequent requests from the user
 			const token = fastify.dbFuncs.users.signToken(req, user)
 
-			return success(req, reply, { code: 'ok', data: { token } })
+			return success<z.infer<typeof userLoginSuccessData.shape.data>>(req, reply, { code: 'ok', data: { token } })
 		},
 	)
 })

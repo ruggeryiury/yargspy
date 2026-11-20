@@ -44,11 +44,11 @@ export const ErrorHandlers = fp((fastify, _, done) => {
 			const responseData = formatZodValidationError(error)
 			return reply.status(responseData.statusCode).send(responseData)
 		} else if (error instanceof Error && 'code' in error && 'statusCode' in error) {
-			const responseData = { statusCode: error.statusCode, statusName: httpCodes[error.statusCode as keyof typeof httpCodes], code: error.code as string, message: error.message } as GenericServerResponse
+			if (fastify.isDev() && JSON.parse(JSON.stringify(error)).cause?.message) console.log(JSON.parse(JSON.stringify(error)).cause?.message)
+			const responseData = { statusCode: error.statusCode, statusName: httpCodes[error.statusCode as keyof typeof httpCodes], code: (error.code as string).toLowerCase(), message: error.message } as GenericServerResponse
 
 			return reply.status(responseData.statusCode as number).send(responseData)
 		} else {
-			console.log(error)
 			const responseData = { statusCode: 500, statusName: httpCodes[500], code: 'unknown_server_error', message: 'An unknown error has occurred', error: !fastify.isDev() ? undefined : typeof error === 'object' ? { ...error } : undefined }
 
 			return reply.status(responseData.statusCode).send(responseData)

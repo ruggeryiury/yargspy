@@ -20,7 +20,7 @@ const userScoresSuccessData = genericServerResponse.extend({
 
 export const userScores = fp(async (app) => {
 	app.post<{ Params: GenericIdParams; Querystring: UserScoresQuerystring }>(
-		'/api/v1/users/:id/scores',
+		'/v1/users/:id/scores',
 		{
 			schema: {
 				tags: ['Users'],

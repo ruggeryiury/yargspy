@@ -3,7 +3,7 @@ import z from 'zod'
 import { serializedObjectId } from '../globals'
 import { genericServerResponse } from '../response'
 
-export const patchSongEntryBody = z.object({
+export const songUpdateBody = z.object({
 	name: z.string().optional(),
 	artist: z.string().optional(),
 	charter: z.string().optional(),
@@ -16,11 +16,11 @@ export const patchSongEntryBody = z.object({
 	multiplierNote: z.number().optional(),
 	reason: z.string().nonempty().optional(),
 })
-export type PatchSongEntryBody = z.infer<typeof patchSongEntryBody>
+export type SongUpdateBody = z.infer<typeof songUpdateBody>
 
-export const patchSongEntrySuccessData = genericServerResponse.extend({
+export const songUpdateSuccessData = genericServerResponse.extend({
 	data: z.object({
 		song: serializedObjectId,
 	}),
 })
-export type PatchSongEntrySuccessData = z.infer<typeof patchSongEntrySuccessData>
+export type SongUpdateSuccessData = z.infer<typeof songUpdateSuccessData>

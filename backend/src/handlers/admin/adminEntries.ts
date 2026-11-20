@@ -1,4 +1,5 @@
 import fp from 'fastify-plugin'
+import type z from 'zod'
 
 import { adminEntriesSuccessData } from '@schemas'
 
@@ -8,7 +9,7 @@ import { Swagger } from '../../core/services/Swagger'
 
 export const adminEntries = fp(async (app) => {
 	app.get(
-		'/api/v1/admin/entries',
+		'/v1/admin/entries',
 		{
 			schema: {
 				tags: ['Admin'],
@@ -28,7 +29,7 @@ export const adminEntries = fp(async (app) => {
 		},
 		async (req, reply) => {
 			const entries = (await app.db.users.find({ admin: true }).toArray()).map((entry) => entry.username)
-			return success(req, reply, { code: 'ok', data: { entries } })
+			return success<z.infer<typeof adminEntriesSuccessData.shape.data>>(req, reply, { code: 'ok', data: { entries } })
 		},
 	)
 })

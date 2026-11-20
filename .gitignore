@@ -151,3 +151,5 @@ YARGReplayWatcher/config.ini
 
 # For now, gonna hide the watcher
 YARGReplayWatcher/
+
+backend/*.MD

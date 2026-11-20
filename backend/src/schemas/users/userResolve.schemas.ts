@@ -2,24 +2,12 @@ import z from 'zod'
 
 import { genericServerResponse } from '../response'
 
-export const userResolveBody = z.discriminatedUnion('input', [
-	z.object({
-		input: z.literal('id'),
-		output: z.enum(['username', 'email']),
-		value: z.string().nonempty(),
-	}),
-	z.object({
-		input: z.literal('username'),
-		output: z.enum(['id', 'email']),
-		value: z.string().nonempty(),
-	}),
-	z.object({
-		input: z.literal('email'),
-		output: z.enum(['id', 'username']),
-		value: z.string().nonempty(),
-	}),
-])
-export type UserResolveBody = z.infer<typeof userResolveBody>
+export const userResolveQuerystring = z.object({
+	input: z.coerce.number().int().optional().default(0),
+	output: z.coerce.number().int().optional().default(1),
+	value: z.coerce.string(),
+})
+export type UserResolveQuerystring = z.infer<typeof userResolveQuerystring>
 
 export const userResolveSuccessData = genericServerResponse.extend({
 	data: z.object({

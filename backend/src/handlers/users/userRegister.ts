@@ -2,6 +2,7 @@ import fp from 'fastify-plugin'
 import { MongoServerError } from 'mongodb'
 import type z from 'zod'
 
+import { leadingArticleToTrailing } from '@lib/dta-parser/dta/textMethods'
 import { normalizeStr } from '@lib/utils/strnum'
 import { validateHCaptcha } from '@lib/validators/validateHCaptcha'
 import { type UserRegisterBody, userRegisterBody } from '@schemas'
@@ -12,7 +13,7 @@ import { Swagger } from '../../core/services/Swagger'
 
 export const userRegister = fp((fastify, _, done) => {
 	fastify.post<{ Body: UserRegisterBody }>(
-		'/api/v1/users/register',
+		'/v1/users/register',
 		{
 			schema: {
 				tags: ['Login/Register'],
@@ -48,7 +49,7 @@ export const userRegister = fp((fastify, _, done) => {
 
 			try {
 				const now = new Date()
-				const document = await fastify.db.users.insertOne({ _id: new fastify.mongo.ObjectId(), username, usernameSearch: normalizeStr(username), email, password: hashedPassword, active: true, admin: false, createdAt: now, updatedAt: now, country, emailVerified: !fastify.env.DISABLE_MAIL_SERVICE })
+				const document = await fastify.db.users.insertOne({ _id: new fastify.mongo.ObjectId(), username, usernameSearch: normalizeStr(username), usernameSort: leadingArticleToTrailing(normalizeStr(username)), email, password: hashedPassword, active: true, admin: false, createdAt: now, updatedAt: now, country, emailVerified: !fastify.env.DISABLE_MAIL_SERVICE })
 
 				if (fastify.mailer && !fastify.env.DISABLE_MAIL_SERVICE) {
 					// Issue e-mail token

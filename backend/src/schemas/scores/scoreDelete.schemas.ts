@@ -3,7 +3,7 @@ import z from 'zod'
 import { genericServerResponse } from '@schemas'
 
 export const scoreDeleteQuerystring = z.object({
-	reason: z.string().nonempty(),
+	reason: z.string().nonempty().optional(),
 })
 export type ScoreDeleteQuerystring = z.infer<typeof scoreDeleteQuerystring>
 

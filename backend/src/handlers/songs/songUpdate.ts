@@ -1,7 +1,7 @@
 import fp from 'fastify-plugin'
 import type z from 'zod'
 
-import { type GenericIdParams, type PatchSongEntryBody, genericIdParams, patchSongEntryBody, patchSongEntrySuccessData } from '@schemas'
+import { type GenericIdParams, type SongUpdateBody, genericIdParams, songUpdateBody, songUpdateSuccessData } from '@schemas'
 
 import { YARGSPY } from '../../constants'
 import { userBearerAuth } from '../../core/services/Auth'
@@ -9,22 +9,22 @@ import type { SongModel } from '../../core/services/Database'
 import { ServerError, success } from '../../core/services/ServerResponse'
 import { Swagger } from '../../core/services/Swagger'
 
-export const patchSongEntry = fp(async (app) => {
-	app.patch<{ Body: PatchSongEntryBody; Params: GenericIdParams }>(
-		'/api/v1/songs/:id',
+export const songUpdate = fp(async (app) => {
+	app.patch<{ Body: SongUpdateBody; Params: GenericIdParams }>(
+		'/v1/songs/:id',
 		{
 			schema: {
 				tags: ['Songs'],
 				summary: 'Updates entry values from a specific song',
 				description: '_This route needs administrator rights to access it. All body values are optional for updating._',
 				response: {
-					200: Swagger.replySchema('ok', patchSongEntrySuccessData.shape.data).describe('Default response'),
+					200: Swagger.replySchema('ok', songUpdateSuccessData.shape.data).describe('Default response'),
 					400: Swagger.replySchema('bad_request').describe('No fields provided for update'),
 					403: Swagger.replySchema('forbidden').describe('User banned for the server, or with no administrator rights'),
 					404: Swagger.replySchema('not_found').describe('Song not found using the provided ID'),
 					422: Swagger.replySchema('validation_error').describe('Request body with validation errors, wrong entry ID format'),
 				},
-				body: patchSongEntryBody,
+				body: songUpdateBody,
 				params: genericIdParams,
 				security: [
 					{
@@ -60,13 +60,13 @@ export const patchSongEntry = fp(async (app) => {
 			await app.db.adminLogs.insertOne({
 				_id: new app.mongo.ObjectId(),
 				admin: req.userDocument._id,
-				action: YARGSPY.AdminAction.SongUpdate,
+				action: YARGSPY.AdminLogAction.SongUpdate,
 				item: song._id,
 				createdAt: new Date(),
 				reason,
 			})
 
-			return success<z.infer<typeof patchSongEntrySuccessData.shape.data>>(req, reply, { code: 'ok', data: { song: songId } })
+			return success<z.infer<typeof songUpdateSuccessData.shape.data>>(req, reply, { code: 'ok', data: { song: songId } })
 		},
 	)
 })

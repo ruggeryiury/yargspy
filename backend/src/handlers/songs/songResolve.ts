@@ -9,7 +9,7 @@ import { Swagger } from '../../core/services/Swagger'
 
 export const songResolve = fp(async (app) => {
 	app.post<{ Body: SongResolveBody }>(
-		'/api/v1/users/resolve',
+		'/v1/songs/resolve',
 		{
 			schema: {
 				tags: ['Songs'],

@@ -137,7 +137,7 @@ export const Difficulty = {
   ExpertPlus: 5,
 } as const
 
-export const AdminAction = {
+export const AdminLogAction = {
   UserBan: 0,
   UserUnban: 1,
   SongAdd: 2,

@@ -57,14 +57,14 @@
               @click="gotoUser(entry.item)"
               v-if="
                 (
-                  [AdminAction.UserBan, AdminAction.UserUnban, AdminAction.UserUpdate] as number[]
+                  [AdminLogAction.UserBan, AdminLogAction.UserUnban, AdminLogAction.UserUpdate] as number[]
                 ).includes(entry.action)
               "
               >{{ entry.item }}</span
             >
             <RouterLink
               v-else-if="
-                ([AdminAction.SongAdd, AdminAction.SongUpdate] as number[]).includes(entry.action)
+                ([AdminLogAction.SongAdd, AdminLogAction.SongUpdate] as number[]).includes(entry.action)
               "
               :to="{ name: 'leaderboard', params: { id: entry.item } }"
               >{{ entry.item }}</RouterLink
@@ -99,7 +99,7 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import api from '@/plugins/axios'
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
-import { type IAdminLogEntriesResponse, AdminAction } from '@/plugins/types'
+import { type IAdminLogEntriesResponse, AdminLogAction } from '@/plugins/types'
 import { getAdminLogAction } from '@/plugins/utils'
 import { toast } from 'vue-sonner'
 import { useRouter } from 'vue-router'
@@ -135,7 +135,7 @@ const admins = ref(null as { _id: string; username: string }[] | null)
 const actionList = computed(() => {
   const result: Map<string, string> = new Map()
   result.set('-1', 'All actions')
-  for (let i = 0; i <= AdminAction.UserUpdate; i++) {
+  for (let i = 0; i <= AdminLogAction.UserUpdate; i++) {
     result.set(i.toString(), getAdminLogAction(i))
   }
   return result

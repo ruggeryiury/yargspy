@@ -2,8 +2,9 @@ import type { FastifyInstance } from 'fastify'
 
 import { adminEntries } from '../../handlers/admin/adminEntries'
 import { scoreDelete } from '../../handlers/scores/scoreDelete'
+import { getSongLeaderboards } from '../../handlers/songs/getLeaderboards'
 import { getSongDetails } from '../../handlers/songs/getSongDetails'
-import { patchSongEntry } from '../../handlers/songs/patchSongEntry'
+import { psongUpdate } from '../../handlers/songs/psongUpdate'
 import { songDelete } from '../../handlers/songs/songDelete'
 import { songResolve } from '../../handlers/songs/songResolve'
 import { patchUserStatus } from '../../handlers/users/patchUserStatus'
@@ -22,8 +23,9 @@ export class ServerRoutes {
 		await app.register(scoreDelete)
 
 		// Songs
+		await app.register(getSongLeaderboards)
 		await app.register(getSongDetails)
-		await app.register(patchSongEntry)
+		await app.register(psongUpdate)
 		await app.register(songDelete)
 		await app.register(songResolve)
 
