@@ -24,6 +24,31 @@ export const userDocument = z.object({
 })
 export type UserDocument = z.infer<typeof userDocument>
 
+export const publicUserDocument = userDocument.pick({
+	_id: true,
+	username: true,
+	country: true,
+	profilePhotoURL: true,
+	bannerURL: true,
+	createdAt: true,
+})
+export type PublicUserDocument = z.infer<typeof publicUserDocument>
+
+export const authenticatedUserDocument = userDocument.pick({
+	_id: true,
+	username: true,
+	email: true,
+	emailVerified: true,
+	active: true,
+	admin: true,
+	country: true,
+	profilePhotoURL: true,
+	bannerURL: true,
+	createdAt: true,
+	updatedAt: true,
+})
+export type AuthenticatedUserDocument = z.infer<typeof authenticatedUserDocument>
+
 export const adminLogDocument = z.object({
 	_id: serializedObjectId,
 	admin: serializedObjectId,
@@ -191,7 +216,7 @@ export const songDocument = z.object({
 	album: z.string().optional(),
 	albumSearch: z.string().optional(),
 	albumSort: z.string().optional(),
-	year: z.string().optional(),
+	year: z.number().int().optional(),
 	proDrums: z.boolean().optional(),
 	fiveLaneDrums: z.boolean().optional(),
 	sustainCutoffThreshold: z.number().optional(),

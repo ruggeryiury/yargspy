@@ -17,6 +17,7 @@ import { type ServerEnvObject, serverEnvObject } from '@schemas'
 
 import { DatabasePlugin } from './Database'
 import { ErrorHandlers } from './ErrorHandlers'
+import { FileSystem } from './FileSystem'
 import { MailerPlugin } from './MailerPlugin'
 import { ServerEnv } from './ServerEnv'
 import { ServerError } from './ServerResponse'
@@ -67,6 +68,7 @@ export class ServerInit {
 		await app.register(DatabasePlugin)
 		await app.register(ErrorHandlers)
 		await app.register(MailerPlugin)
+		await app.register(FileSystem.plugin)
 	}
 
 	static async initSwaggerUI(app: FastifyInstance) {

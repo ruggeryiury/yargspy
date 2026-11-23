@@ -10,7 +10,6 @@ import { success } from '../../core/services/ServerResponse'
 import { Swagger } from '../../core/services/Swagger'
 
 const userScoresAggregationObject = scoreModel.extend({ song: songModel.pick({ _id: true, name: true, artist: true, charter: true, chartFileHash: true }) })
-type UserScoresAggregationObject = z.infer<typeof userScoresAggregationObject>
 const userScoresSuccessData = genericServerResponse.extend({
 	data: z.object({
 		pagination: genericPaginationObject,
@@ -19,14 +18,14 @@ const userScoresSuccessData = genericServerResponse.extend({
 })
 
 export const userScores = fp(async (app) => {
-	app.post<{ Params: GenericIdParams; Querystring: UserScoresQuerystring }>(
+	app.get<{ Params: GenericIdParams; Querystring: UserScoresQuerystring }>(
 		'/v1/users/:id/scores',
 		{
 			schema: {
 				tags: ['Users'],
 				summary: "Gets paginated results of an user's scores",
 				response: {
-					200: Swagger.replySchema('ok', userScoresSuccessData.shape.data.extend({ entries: userScoresAggregationObject })).describe('Default response'),
+					200: Swagger.replySchema('ok', userScoresSuccessData.shape.data).describe('Default response'),
 					422: Swagger.replySchema('validation_error').describe('Request body with validation errors, wrong entry ID format'),
 				},
 				querystring: userScoresQuerystring,
@@ -43,7 +42,7 @@ export const userScores = fp(async (app) => {
 
 			const [entries, totalResults] = await Promise.all([
 				app.db.scores
-					.aggregate<UserScoresAggregationObject>([
+					.aggregate<z.infer<typeof userScoresAggregationObject>>([
 						{ $match: filter },
 						{
 							$sort: {
@@ -51,25 +50,25 @@ export const userScores = fp(async (app) => {
 								_id: -1,
 							},
 						},
-						{ $skip: skip },
-						{ $limit: limit },
+						{ $skip: 0 },
+						{ $limit: 10 },
 						{
 							$lookup: {
 								from: 'songs',
+								as: 'xSong',
 								let: {
 									songId: '$song',
 								},
 								pipeline: [
 									{
 										$match: {
-											$exp: {
+											$expr: {
 												$eq: ['$_id', '$$songId'],
 											},
 										},
 									},
 									{
 										$project: {
-											_id: 1,
 											name: 1,
 											artist: 1,
 											charter: 1,
@@ -77,15 +76,16 @@ export const userScores = fp(async (app) => {
 										},
 									},
 								],
-								as: 'song',
 							},
 						},
 						{
 							$unwind: {
-								path: '$song',
+								path: '$xSong',
 								preserveNullAndEmptyArrays: true,
 							},
 						},
+						{ $set: { song: '$xSong' } },
+						{ $unset: 'xSong' },
 					])
 					.toArray(),
 				app.db.scores.countDocuments(filter),

@@ -1,7 +1,6 @@
 import fp from 'fastify-plugin'
-import type z from 'zod'
 
-import { type GenericIdParams, type SongUpdateBody, genericIdParams, songUpdateBody, songUpdateSuccessData } from '@schemas'
+import { type GenericIdParams, type SongUpdateBody, genericIdParams, songUpdateBody } from '@schemas'
 
 import { YARGSPY } from '../../constants'
 import { userBearerAuth } from '../../core/services/Auth'
@@ -16,9 +15,9 @@ export const songUpdate = fp(async (app) => {
 			schema: {
 				tags: ['Songs'],
 				summary: 'Updates entry values from a specific song',
-				description: '_This route needs administrator rights to access it. All body values are optional for updating._',
+				description: '_This route needs administrator rights to access it.<br />All body values are optional for updating. Returns error when no value is provided._',
 				response: {
-					200: Swagger.replySchema('ok', songUpdateSuccessData.shape.data).describe('Default response'),
+					200: Swagger.replySchema('ok').describe('Default response'),
 					400: Swagger.replySchema('bad_request').describe('No fields provided for update'),
 					403: Swagger.replySchema('forbidden').describe('User banned for the server, or with no administrator rights'),
 					404: Swagger.replySchema('not_found').describe('Song not found using the provided ID'),
@@ -35,8 +34,9 @@ export const songUpdate = fp(async (app) => {
 			preHandler: app.auth([userBearerAuth({ admin: true })]),
 		},
 		async (req, reply) => {
-			if (Object.keys(req.body).length === 0) throw new ServerError('err_update_no_value')
 			const { id: songId } = req.params
+
+			if (Object.keys(req.body).length === 0) throw new ServerError('err_update_no_value')
 			const { album, artist, charter, fiveLaneDrums, hopoFrequency, multiplierNote, name, proDrums, reason, sustainCutoffThreshold, year } = req.body
 
 			const song = await app.dbFuncs.songs.findById(songId)
@@ -48,7 +48,7 @@ export const songUpdate = fp(async (app) => {
 			if (artist !== undefined) songUpdate.artist = artist
 			if (charter !== undefined) songUpdate.charter = charter
 			if (album !== undefined) songUpdate.album = album
-			if (year !== undefined) songUpdate.year = year
+			if (year !== undefined && !Number.isNaN(Number(year))) songUpdate.year = Number(year)
 			if (proDrums !== undefined) songUpdate.proDrums = proDrums
 			if (fiveLaneDrums !== undefined) songUpdate.fiveLaneDrums = fiveLaneDrums
 			if (sustainCutoffThreshold !== undefined) songUpdate.sustainCutoffThreshold = sustainCutoffThreshold
@@ -66,7 +66,7 @@ export const songUpdate = fp(async (app) => {
 				reason,
 			})
 
-			return success<z.infer<typeof songUpdateSuccessData.shape.data>>(req, reply, { code: 'ok', data: { song: songId } })
+			return success(req, reply, { code: 'ok' })
 		},
 	)
 })

@@ -9,10 +9,12 @@ export * from './schemas/scores/scoreDelete.schemas'
 
 export * from './schemas/songs/getLeaderboards.schemas'
 export * from './schemas/songs/getSongDetails.schemas'
-export * from './schemas/songs/songUpdate.schemas'
 export * from './schemas/songs/songDelete.schemas'
+export * from './schemas/songs/songRegister.schemas'
 export * from './schemas/songs/songResolve.schemas'
+export * from './schemas/songs/songUpdate.schemas'
 
+export * from './schemas/users/getUserDetails.schemas'
 export * from './schemas/users/patchUserStatus.schemas'
 export * from './schemas/users/userEntries.schemas'
 export * from './schemas/users/userLogin.schemas'

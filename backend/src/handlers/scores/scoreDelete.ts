@@ -40,8 +40,8 @@ export const scoreDelete = fp(async (fastify) => {
 			if (!score) throw new ServerError('err_score_not_found')
 
 			// Delete replay file
-			if (fastify.isDev() || fastify.env.FILE_ROOT) {
-				const replayFile = fastify.fs.getReplayFile(score.replayPath)
+			if (fastify.env.DISABLE_AWS) {
+				const replayFile = fastify.fs.getReplayFile(score)
 				if (replayFile.exists) await replayFile.delete()
 			} else {
 				// TODO: on prod, delete file in S3

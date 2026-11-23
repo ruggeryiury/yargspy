@@ -1,29 +1,33 @@
 import axios from 'axios'
 
-import { type AdminEntriesSuccessData, type GenericServerResponse, type PatchUserStatusBody, type PatchUserStatusSuccessData, type PsongUpdateBody, type SerializedObjectId, type SongDeleteQuerystring, type TokenString, type UserLoginBody, type UserLoginSuccessData, type UserRegisterBody, type UserResolveQuerystring, type UserResolveSuccessData, type UserScoresQuerystring, type UserScoresSuccessData } from '@schemas'
+import { type AdminEntriesSuccessData, type GenericServerResponse, type GetSongDetailsSuccessData, type GetSongLeaderboardsQuerystring, type GetSongLeaderboardsSuccessData, type GetUserDetailsSuccessData, type PatchUserStatusBody, type PatchUserStatusSuccessData, type ScoreDeleteQuerystring, type ScoreDeleteSuccessData, type SerializedObjectId, type SongDeleteQuerystring, type SongRegisterSuccessData, type SongResolveQuerystring, type SongResolveSuccessData, type SongUpdateBody, type TokenString, type UserLoginBody, type UserLoginSuccessData, type UserRegisterBody, type UserResolveSuccessData, type UserScoresQuerystring, type UserScoresSuccessData } from '@schemas'
 
-import type { getSongDetailsSuccessData } from './schemas/songs/getSongDetails.schemas'
-
-export const serverAPIAxios = axios.create({ baseURL: 'http://localhost:5000/api/v1', validateStatus: (status) => status < 500 })
+export const serverAxios = axios.create({ baseURL: 'http://localhost:5000/v1', validateStatus: (status) => status < 500 })
 
 export const serverAPI = {
 	admin: {
-		adminEntries: (token: TokenString) => serverAPIAxios.get<AdminEntriesSuccessData>('admin/entries', { headers: { Authorization: `Bearer ${token}` } }),
+		/**
+		 * Returns a list of all the registered users with administrator rights.
+		 */
+		entries: (token: TokenString) => serverAxios.get<AdminEntriesSuccessData>('admin/entries', { headers: { Authorization: `Bearer ${token}` } }),
 	},
 	scores: {
-		scoreDelete: (token: TokenString, scoreId: SerializedObjectId, body: SongDeleteQuerystring) => serverAPIAxios.post<GenericServerResponse>(`songs/${scoreId}/delete`, body, { headers: { Authorization: `Bearer ${token}` } }),
+		delete: (token: TokenString, scoreId: SerializedObjectId, params: ScoreDeleteQuerystring) => serverAxios.delete<ScoreDeleteSuccessData>(`scores/${scoreId}`, { params, headers: { Authorization: `Bearer ${token}` } }),
 	},
 	songs: {
-		getSongDetails: (songId: SerializedObjectId) => serverAPIAxios.get<getSongDetailsSuccessData>(`songs/${songId}/data`),
-		psongUpdate: (token: TokenString, songId: SerializedObjectId, body: PsongUpdateBody) => serverAPIAxios.patch(`songs/${songId}/data`, body, { headers: { Authorization: `Bearer ${token}` } }),
-		songDelete: (token: TokenString, songId: SerializedObjectId, body: SongDeleteQuerystring) => serverAPIAxios.post<GenericServerResponse>(`songs/${songId}/delete`, body, { headers: { Authorization: `Bearer ${token}` } }),
-		resolve: (body: UserResolveQuerystring) => serverAPIAxios.post<UserResolveSuccessData>('users/resolve', body),
+		data: (songId: SerializedObjectId) => serverAxios.get<GetSongDetailsSuccessData>(`songs/${songId}`),
+		delete: (token: TokenString, songId: SerializedObjectId, params: SongDeleteQuerystring) => serverAxios.delete<GenericServerResponse>(`songs/${songId}`, { params, headers: { Authorization: `Bearer ${token}` } }),
+		leaderboards: (songId: SerializedObjectId, params: GetSongLeaderboardsQuerystring) => serverAxios.get<GetSongLeaderboardsSuccessData>(`songs/${songId}/leaderboards`, { params }),
+		register: (token: TokenString, body: FormData) => serverAxios.post<SongRegisterSuccessData>('/songs/register', body, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } }),
+		resolve: (params: SongResolveQuerystring) => serverAxios.get<SongResolveSuccessData>('songs/resolve', { params }),
+		update: (token: TokenString, songId: SerializedObjectId, body: SongUpdateBody) => serverAxios.patch<GenericServerResponse>(`songs/${songId}`, body, { headers: { Authorization: `Bearer ${token}` } }),
 	},
 	users: {
-		register: (body: UserRegisterBody) => serverAPIAxios.post<GenericServerResponse>('users/register', body),
-		patchUserStatus: (token: TokenString, userId: SerializedObjectId, body: PatchUserStatusBody) => serverAPIAxios.patch<PatchUserStatusSuccessData>(`users/${userId}/status`, body, { headers: { Authorization: `Bearer ${token}` } }),
-		login: (body: UserLoginBody) => serverAPIAxios.post<UserLoginSuccessData>('users/register', body),
-		resolve: (body: UserResolveQuerystring) => serverAPIAxios.post<UserResolveSuccessData>('users/resolve', body),
-		scores: (userId: SerializedObjectId, params: UserScoresQuerystring) => serverAPIAxios.get<UserScoresSuccessData>(`users/${userId}/scores`, { params }),
+		data: (userId: SerializedObjectId) => serverAxios.get<GetUserDetailsSuccessData>(`users/${userId}`),
+		patchUserStatus: (token: TokenString, userId: SerializedObjectId, body: PatchUserStatusBody) => serverAxios.patch<PatchUserStatusSuccessData>(`users/${userId}/status`, body, { headers: { Authorization: `Bearer ${token}` } }),
+		login: (body: UserLoginBody) => serverAxios.post<UserLoginSuccessData>('users/login', body),
+		register: (body: UserRegisterBody) => serverAxios.post<GenericServerResponse>('users/login', body),
+		resolve: (params: SongResolveQuerystring) => serverAxios.get<UserResolveSuccessData>('users/resolve', { params }),
+		scores: (userId: SerializedObjectId, params: UserScoresQuerystring) => serverAxios.get<UserScoresSuccessData>(`/users/${userId}/scores`, { params }),
 	},
 } as const

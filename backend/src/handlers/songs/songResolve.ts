@@ -1,14 +1,15 @@
 import fp from 'fastify-plugin'
 import type z from 'zod'
 
-import { type SongResolveBody, songResolveBody, songResolveSuccessData } from '@schemas'
+import { type SongResolveQuerystring, songResolveQuerystring, songResolveSuccessData } from '@schemas'
 
+import { YARGSPY } from '../../constants'
 import type { SongModel } from '../../core/services/Database'
 import { ServerError, success } from '../../core/services/ServerResponse'
 import { Swagger } from '../../core/services/Swagger'
 
 export const songResolve = fp(async (app) => {
-	app.post<{ Body: SongResolveBody }>(
+	app.get<{ Querystring: SongResolveQuerystring }>(
 		'/v1/songs/resolve',
 		{
 			schema: {
@@ -19,20 +20,21 @@ export const songResolve = fp(async (app) => {
 					404: Swagger.replySchema('not_found').describe('No user found using the provided parameters'),
 					422: Swagger.replySchema('validation_error').describe('Request body with validation errors'),
 				},
-				body: songResolveBody,
+				querystring: songResolveQuerystring,
 			},
 		},
 		async (req, reply) => {
-			const { input, output, value } = req.body
+			const { input, output, value } = req.query
 
 			let song: SongModel | null
 
 			switch (input) {
-				case 'chartFileHash':
-					song = await app.dbFuncs.songs.findByChartFileHash(value)
-					break
-				case 'id':
+				case YARGSPY.SongResolver.ID:
+				default:
 					song = await app.dbFuncs.songs.findById(value)
+					break
+				case YARGSPY.SongResolver.ChartFileHash:
+					song = await app.dbFuncs.songs.findByChartFileHash(value)
 					break
 			}
 
@@ -41,10 +43,11 @@ export const songResolve = fp(async (app) => {
 			let outputValue: string = ''
 
 			switch (output) {
-				case 'chartFileHash':
+				case YARGSPY.SongResolver.ChartFileHash:
+				default:
 					outputValue = song.chartFileHash
 					break
-				case 'id':
+				case YARGSPY.SongResolver.ID:
 					outputValue = song._id.toHexString()
 					break
 			}

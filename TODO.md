@@ -20,6 +20,7 @@
   - [x] Create tool to verify and extract replay data using YARG.Core (based on [ReplayCli](https://github.com/YARC-Official/YARG.Core/tree/master/ReplayCli))
     - [ ] (maybe) If hosting on server, create cronjob to update the YARG.Core dlls if needed
 - [ ] (all endpoints) project/select only fields actually used by front-end to optimize data transfer
-- [ ] finish [Server API Documentation](docs/serverapi.md)
+- [x] finish [Server API Documentation](docs/serverapi.md)
+  - _The server API documentation is now done directly by Fastify. On dev mode, go to `5000:docs` to access it._
 - [ ] CI/CD
 - [ ] Figure out how `songs_updates` affect replay files and how to handle that

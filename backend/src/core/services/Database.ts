@@ -130,6 +130,31 @@ export const userModel = z.object({
 })
 export type UserModel = z.infer<typeof userModel>
 
+export const publicUserModel = userModel.pick({
+	_id: true,
+	username: true,
+	country: true,
+	profilePhotoURL: true,
+	bannerURL: true,
+	createdAt: true,
+})
+export type PublicUserModel = z.infer<typeof publicUserModel>
+
+export const authenticatedUserModel = userModel.pick({
+	_id: true,
+	username: true,
+	email: true,
+	emailVerified: true,
+	active: true,
+	admin: true,
+	country: true,
+	profilePhotoURL: true,
+	bannerURL: true,
+	createdAt: true,
+	updatedAt: true,
+})
+export type AuthenticatedUserModel = z.infer<typeof authenticatedUserModel>
+
 export const adminLogModel = z.object({
 	_id: z.instanceof(ObjectId),
 	admin: z.instanceof(ObjectId),
@@ -297,7 +322,7 @@ export const songModel = z.object({
 	album: z.string().optional(),
 	albumSearch: z.string().optional(),
 	albumSort: z.string().optional(),
-	year: z.string().optional(),
+	year: z.number().int().optional(),
 	proDrums: z.boolean().optional(),
 	fiveLaneDrums: z.boolean().optional(),
 	sustainCutoffThreshold: z.number().optional(),

@@ -29,8 +29,11 @@ await ServerRoutes.init(app)
 await app.ready()
 
 switch (actionId) {
+	default:
+		throw new Error('No migration step found using provided index')
 	case 1: {
 		await searchAndSortUpdate001(app)
+		break
 	}
 }
 process.exit(0)

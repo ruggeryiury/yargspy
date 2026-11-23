@@ -1,6 +1,6 @@
 import z from 'zod'
 
-import { genericServerResponse } from '@schemas'
+import { genericServerResponse } from '../response'
 
 export const scoreDeleteQuerystring = z.object({
 	reason: z.string().nonempty().optional(),

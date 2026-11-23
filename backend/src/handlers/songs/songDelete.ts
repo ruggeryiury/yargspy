@@ -41,14 +41,22 @@ export const songDelete = fp(async (fastify) => {
 			// fetch scores for the song; delete their replay file (if it exists), and the DB entries
 			const scores = await fastify.db.scores.find({ song: song._id }).toArray()
 			for (const score of scores) {
-				const replayFile = fastify.fs.getReplayFile(score.replayPath)
-				if (replayFile.exists) await replayFile.delete()
+				if (fastify.env.DISABLE_AWS) {
+					const replayFile = fastify.fs.getReplayFile(score)
+					if (replayFile.exists) await replayFile.delete()
+				} else {
+					// S3 logic
+				}
 				await fastify.db.scores.findOneAndDelete({ _id: score._id })
 			}
 
 			// after deleting the scores, delete the chart file and the song's DB entry
-			const chartFilePath = fastify.fs.getChartFile(song)
-			if (chartFilePath.exists) await chartFilePath.delete()
+			if (fastify.env.DISABLE_AWS) {
+				const chartFilePath = fastify.fs.getChartFile(song)
+				if (chartFilePath.exists) await chartFilePath.delete()
+			} else {
+				// S3 logic
+			}
 			await fastify.db.songs.findOneAndDelete({ _id: song._id })
 
 			// No await, this can be done async

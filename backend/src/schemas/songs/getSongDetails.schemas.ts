@@ -1,6 +1,7 @@
 import z from 'zod'
 
-import { genericServerResponse, songDocument } from '@schemas'
+import { songDocument } from '../db'
+import { genericServerResponse } from '../response'
 
 export const getSongDetailsSuccessData = genericServerResponse.extend({ data: z.object({ song: songDocument }) })
-export type getSongDetailsSuccessData = z.infer<typeof getSongDetailsSuccessData>
+export type GetSongDetailsSuccessData = z.infer<typeof getSongDetailsSuccessData>

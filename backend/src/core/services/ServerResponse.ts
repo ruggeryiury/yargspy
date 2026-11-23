@@ -156,9 +156,17 @@ export const serverCodeMap = {
 	err_captcha_validation: [401, 'The provided response to the captcha validation is invalid'],
 	err_register_duplicated_email: [409, `Provided e-mail "{{email}}" is already being used`],
 	err_register_duplicated_username: [409, 'Provided username "{{username}}" is already being used'],
+	err_replay_invalid_midi_file: [422, 'Provided MIDI file is not a valid MIDI file'],
+	err_replay_invalid_chart_file: [422, 'Provided CHART file is not a valid CHART file'],
+	err_replay_invalid_ini_file: [422, "Provided Clone Hero's INI file is not a valid INI file"],
+
+	// Server specific codes
 	err_score_not_found: [404, 'No registered score found using the provided credentials'],
 	ok_delete_entry: [204, 'Entry deleted successfully'],
 	err_update_no_value: [400, 'At least one field must be provided for entry updating'],
+	err_not_implemented: [501, '{{feature}} not implemented yet'],
+	err_register_duplicated_song: [409, 'Provided song has already been registered'],
+	err_register_songdata_required: [422, 'Song not registered in the server database, the MIDI/CHART file and the song metadata file is required to register this song'],
 
 	// Generic codes
 	ok: [200, 'OK'],
@@ -173,7 +181,8 @@ export const serverCodeMap = {
 	too_many_requests: [429, 'Too many requests, try again in {{count}}'],
 	internal_server_error: [500, 'An unknown error occurred'],
 	unknown_server_error: [500, 'An unknown error occurred'],
-	route_not_found: [404, ''],
+	not_implemented: [501, 'Not Implemented'],
+	route_not_found: [404, 'Route [{{method}}] "{{url}}" not found'],
 } satisfies CodeMapObject
 
 export type ReplyCodeNames = keyof typeof serverCodeMap
@@ -205,6 +214,7 @@ export interface ServerErrorOptions<T extends Record<string, unknown> = Record<s
  * An error class used to properly assign values structured for default Fastify error handler.
  */
 export class ServerError extends Error {
+	override readonly name = 'ServerError'
 	/**
 	 * The status code of the error.
 	 */
@@ -229,6 +239,9 @@ export class ServerError extends Error {
 			this.statusCode = options in serverCodeMap ? serverCodeMap[options as ReplyCodeNames][0] : serverCodeMap.unknown_server_error[0]
 			this.statusName = httpCodes[this.statusCode]
 			this.code = options
+
+			this.name = 'ServerError'
+			Error.captureStackTrace(this, ServerError)
 			return
 		}
 		const { code: c, message: m, messageValues: mv, data: d } = options
@@ -238,6 +251,9 @@ export class ServerError extends Error {
 		this.statusName = httpCodes[this.statusCode]
 		this.code = c
 		if (d) this.data = d
+
+		this.name = 'ServerError'
+		Error.captureStackTrace(this, ServerError)
 	}
 }
 

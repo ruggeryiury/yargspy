@@ -1,6 +1,8 @@
 import z from 'zod'
 
-import { genericPaginationObject, genericServerResponse, scoreDocument, songDocument } from '@schemas'
+import { scoreDocument, songDocument } from '../db'
+import { genericPaginationObject } from '../globals'
+import { genericServerResponse } from '../response'
 
 export const userScoresQuerystring = z.object({
 	page: z.coerce.number().int().positive().default(1),

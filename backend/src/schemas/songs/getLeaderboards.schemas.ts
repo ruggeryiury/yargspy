@@ -1,8 +1,9 @@
 import z from 'zod'
 
-import { genericPaginationObject, genericServerResponse, scoreDocument } from '@schemas'
-
 import { YARGSPY } from '../../constants'
+import { scoreDocument } from '../db'
+import { genericPaginationObject } from '../globals'
+import { genericServerResponse } from '../response'
 
 export const getSongLeaderboardsQuerystring = z.object({
 	instrument: z.coerce.number().int().optional().default(YARGSPY.Instrument.Band),
@@ -14,8 +15,8 @@ export const getSongLeaderboardsQuerystring = z.object({
 		.default([YARGSPY.Modifier.AllStrums, YARGSPY.Modifier.TapsToHopos, YARGSPY.Modifier.NoteShuffle, YARGSPY.Modifier.NoDynamics, YARGSPY.Modifier.NoVocalPercussion, YARGSPY.Modifier.RangeCompress]),
 	allowSlowdowns: z.stringbool().optional().default(false),
 	sortByAccuracy: z.stringbool().optional().default(false),
-	page: z.int().positive().optional().default(1),
-	limit: z.int().positive().optional().default(25),
+	page: z.coerce.number().int().positive().optional().default(1),
+	limit: z.coerce.number().int().positive().optional().default(25),
 })
 export type GetSongLeaderboardsQuerystring = z.infer<typeof getSongLeaderboardsQuerystring>
 

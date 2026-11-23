@@ -102,4 +102,8 @@ export const YARGSPY = {
 		Username: 1,
 		Email: 2,
 	},
+	SongResolver: {
+		ID: 0,
+		ChartFileHash: 1,
+	},
 } as const

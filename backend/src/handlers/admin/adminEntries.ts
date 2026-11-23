@@ -1,11 +1,18 @@
 import fp from 'fastify-plugin'
-import type z from 'zod'
+import z from 'zod'
 
-import { adminEntriesSuccessData } from '@schemas'
+import { genericServerResponse } from '@schemas'
 
 import { userBearerAuth } from '../../core/services/Auth'
+import { userModel } from '../../core/services/Database'
 import { success } from '../../core/services/ServerResponse'
 import { Swagger } from '../../core/services/Swagger'
+
+const adminEntriesSuccessData = genericServerResponse.extend({
+	data: z.object({
+		entries: z.array(userModel.pick({ _id: true, username: true })),
+	}),
+})
 
 export const adminEntries = fp(async (app) => {
 	app.get(
@@ -28,7 +35,21 @@ export const adminEntries = fp(async (app) => {
 			preHandler: app.auth([userBearerAuth({ admin: true })]),
 		},
 		async (req, reply) => {
-			const entries = (await app.db.users.find({ admin: true }).toArray()).map((entry) => entry.username)
+			const entries = await app.db.users
+				.aggregate<z.infer<typeof adminEntriesSuccessData.shape.data.shape.entries.element>>([
+					{
+						$match: {
+							admin: true,
+						},
+					},
+					{
+						$project: {
+							username: true,
+						},
+					},
+				])
+				.toArray()
+
 			return success<z.infer<typeof adminEntriesSuccessData.shape.data>>(req, reply, { code: 'ok', data: { entries } })
 		},
 	)

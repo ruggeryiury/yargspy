@@ -1,8 +1,5 @@
 import z from 'zod'
 
-import { serializedObjectId } from '../globals'
-import { genericServerResponse } from '../response'
-
 export const songUpdateBody = z.object({
 	name: z.string().optional(),
 	artist: z.string().optional(),
@@ -17,10 +14,3 @@ export const songUpdateBody = z.object({
 	reason: z.string().nonempty().optional(),
 })
 export type SongUpdateBody = z.infer<typeof songUpdateBody>
-
-export const songUpdateSuccessData = genericServerResponse.extend({
-	data: z.object({
-		song: serializedObjectId,
-	}),
-})
-export type SongUpdateSuccessData = z.infer<typeof songUpdateSuccessData>
