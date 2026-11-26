@@ -45,7 +45,8 @@ export const songDelete = fp(async (fastify) => {
 					const replayFile = fastify.fs.getReplayFile(score)
 					if (replayFile.exists) await replayFile.delete()
 				} else {
-					// S3 logic
+					// TO-DO: Implement AWS file hosting logic
+					throw new ServerError({ code: 'err_not_implemented', messageValues: { feature: 'AWS for file hosting' } })
 				}
 				await fastify.db.scores.findOneAndDelete({ _id: score._id })
 			}
@@ -55,7 +56,8 @@ export const songDelete = fp(async (fastify) => {
 				const chartFilePath = fastify.fs.getChartFile(song)
 				if (chartFilePath.exists) await chartFilePath.delete()
 			} else {
-				// S3 logic
+				// TO-DO: Implement AWS file hosting logic
+				throw new ServerError({ code: 'err_not_implemented', messageValues: { feature: 'AWS for file hosting' } })
 			}
 			await fastify.db.songs.findOneAndDelete({ _id: song._id })
 

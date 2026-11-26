@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 
 import { adminEntries } from '../../handlers/admin/adminEntries'
 import { scoreDelete } from '../../handlers/scores/scoreDelete'
+import { scoreRegister } from '../../handlers/scores/scoreRegister'
 import { getSongLeaderboards } from '../../handlers/songs/getLeaderboards'
 import { getSongDetails } from '../../handlers/songs/getSongDetails'
 import { songDelete } from '../../handlers/songs/songDelete'
@@ -10,6 +11,7 @@ import { songResolve } from '../../handlers/songs/songResolve'
 import { songUpdate } from '../../handlers/songs/songUpdate'
 import { getUserDetails } from '../../handlers/users/getUserDetails'
 import { patchUserStatus } from '../../handlers/users/patchUserStatus'
+import { userEntries } from '../../handlers/users/userEntries'
 import { userLogin } from '../../handlers/users/userLogin'
 import { userRegister } from '../../handlers/users/userRegister'
 import { userResolve } from '../../handlers/users/userResolve'
@@ -22,6 +24,7 @@ export class ServerRoutes {
 
 		// Scores
 		await app.register(scoreDelete)
+		await app.register(scoreRegister)
 
 		// Songs
 		await app.register(getSongDetails)
@@ -34,7 +37,7 @@ export class ServerRoutes {
 		// Users
 		await app.register(getUserDetails)
 		await app.register(patchUserStatus)
-		// await app.register(userEntries)
+		await app.register(userEntries)
 		await app.register(userLogin)
 		await app.register(userRegister)
 		await app.register(userResolve)

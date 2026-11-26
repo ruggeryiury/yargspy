@@ -10,7 +10,7 @@ export const songRegisterBody = z.object({
 	updateFile: z.file().optional().describe('The path to the song update file. This chart will be merged with the main chart file'),
 	upgradeFile: z.file().optional().describe('The path to the song upgrade file. This chart will be merged with the main chart file'),
 })
-export const songRegisterBodyNoFile = songRegisterBody.omit(['chartFile', 'songDataFile', 'updateFile', 'upgradeFile'])
+export const songRegisterBodyNoFile = z.object({})
 
 export const songRegisterSuccessData = genericServerResponse.extend({
 	data: z.object({

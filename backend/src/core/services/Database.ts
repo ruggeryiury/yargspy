@@ -100,6 +100,13 @@ declare module 'fastify' {
 				 * @returns {Promise<ScoreModel | null>}
 				 */
 				findById: (id: string | ObjectId) => Promise<ScoreModel | null>
+				/**
+				 * Asynchronously finds a score by its REPLAY file SHA256 hash and returns its database entry object. Returns `null` if the provided ID doesn't match any score on the database registry.
+				 * - - - -
+				 * @param {string} replayFileHash An SHA256 hash to fetch the score document from.
+				 * @returns {Promise<ScoreModel | null>}
+				 */
+				findByReplayFileHash: (replayFileHash: string) => Promise<ScoreModel | null>
 			}
 			emailTokens: {
 				issue: (id: string | ObjectId, purpose: 'reset' | 'verify') => Promise<{ document: InsertOneResult<{ _id: ObjectId; user: ObjectId; purpose: 0 | 1; tokenHash: string; expiresAt: Date; usedAt?: Date | undefined }>; token: string; tokenHash: string }>
@@ -286,7 +293,7 @@ export const scoreModel = z.object({
   NoVocalPercussion: 9,
   RangeCompress: 10,
 	*/
-	modifiers: z.array(z.enum(YARGSPY.Modifier)),
+	modifiers: z.array(z.enum(YARGSPY.Modifier)).optional(),
 	songSpeed: z.number(),
 	createdAt: z.date(),
 	profileName: z.string().optional(),
@@ -356,6 +363,7 @@ export const DatabasePlugin = fp(async (fastify) => {
 
 	await users.createIndex('email', { unique: true }, {})
 	await users.createIndex('username', { unique: true }, {})
+	await users.createIndex('usernameSearch', { unique: true }, {})
 
 	await emailTokens.createIndex('expiresAt', { expireAfterSeconds: 0 }, {})
 	await songs.createIndex('chartFileHash', { unique: true }, {})
@@ -423,6 +431,7 @@ export const DatabasePlugin = fp(async (fastify) => {
 		},
 		scores: {
 			findById: async (id) => await fastify.db.scores.findOne({ _id: new fastify.mongo.ObjectId(id) }),
+			findByReplayFileHash: async (replayFileHash) => await fastify.db.scores.findOne({ replayFileHash }),
 		},
 		emailTokens: {
 			issue: async (id, purpose) => {

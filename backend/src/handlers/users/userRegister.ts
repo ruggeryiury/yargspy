@@ -77,7 +77,7 @@ export const userRegister = fp((fastify, _, done) => {
 				if (err instanceof MongoServerError && err.code === 11000) {
 					console.log(err)
 					if (typeof err.keyValue.email === 'string') throw new ServerError({ code: 'err_register_duplicated_email', messageValues: { email: err.keyValue.email as string } })
-					else if (typeof err.keyValue.username === 'string') throw new ServerError({ code: 'err_register_duplicated_username', messageValues: { username: err.keyValue.email as string } })
+					else if (typeof err.keyValue.username === 'string' || typeof err.keyValue.usernameSearch === 'string') throw new ServerError({ code: 'err_register_duplicated_username', messageValues: { username } })
 				}
 
 				throw new ServerError({ code: 'unknown_server_error' })

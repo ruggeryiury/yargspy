@@ -106,4 +106,14 @@ export const YARGSPY = {
 		ID: 0,
 		ChartFileHash: 1,
 	},
+	ScoreRegisterReqType: {
+		Complete: 0,
+		ReplayOnly: 1,
+	},
+	ReplayValidatorReadMode: {
+		ReplayOnly: 0,
+		ReplayAndMidi: 1,
+		MidiOnly: 2,
+		ReturnSongHash: 3,
+	},
 } as const

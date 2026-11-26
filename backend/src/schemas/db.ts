@@ -180,7 +180,7 @@ export const scoreDocument = z.object({
   NoVocalPercussion: 9,
   RangeCompress: 10,
   */
-	modifiers: z.array(z.enum(YARGSPY.Modifier)),
+	modifiers: z.array(z.enum(YARGSPY.Modifier)).optional(),
 	songSpeed: z.number(),
 	createdAt: z.iso.datetime(),
 	profileName: z.string().optional(),

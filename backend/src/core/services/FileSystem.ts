@@ -34,11 +34,11 @@ export class FileSystem {
 		fastify.decorate('fs', {
 			serverRoot: () => serverRoot(fastify.env.FS_SERVER_ROOT),
 			tempDir: () => serverRoot(fastify.env.FS_SERVER_ROOT).gotoDir('temp'),
-			filesDir: () => serverRoot(fastify.env.FS_FILES_ROOT || fastify.env.FS_SERVER_ROOT).gotoDir('files'),
-			replaysDir: () => serverRoot(fastify.env.FS_FILES_ROOT || fastify.env.FS_SERVER_ROOT).gotoDir('files/replay'),
-			chartsDir: () => serverRoot(fastify.env.FS_FILES_ROOT || fastify.env.FS_SERVER_ROOT).gotoDir('files/chart'),
-			getReplayFile: (score: ScoreModel) => serverRoot(fastify.env.FS_FILES_ROOT || fastify.env.FS_SERVER_ROOT).gotoFile(`files/replay/${score.replayPath}.replay`),
-			getChartFile: (song: SongModel) => serverRoot(fastify.env.FS_FILES_ROOT || fastify.env.FS_SERVER_ROOT).gotoFile(`files/chart/${song.chartFileHash}.${song.isChart ? 'chart' : 'mid'}`),
+			filesDir: () => serverRoot(fastify.env.FS_FILES_ROOT || fastify.env.FS_SERVER_ROOT).gotoDir(`${!fastify.env.FS_FILES_ROOT ? 'files' : ''}`),
+			replaysDir: () => serverRoot(fastify.env.FS_FILES_ROOT || fastify.env.FS_SERVER_ROOT).gotoDir(`${!fastify.env.FS_FILES_ROOT ? 'files/' : ''}replay`),
+			chartsDir: () => serverRoot(fastify.env.FS_FILES_ROOT || fastify.env.FS_SERVER_ROOT).gotoDir(`${!fastify.env.FS_FILES_ROOT ? 'files/' : ''}chart`),
+			getReplayFile: (score: ScoreModel) => serverRoot(fastify.env.FS_FILES_ROOT || fastify.env.FS_SERVER_ROOT).gotoFile(`${!fastify.env.FS_FILES_ROOT ? 'files/' : ''}replay/${score.replayPath}.replay`),
+			getChartFile: (song: SongModel) => serverRoot(fastify.env.FS_FILES_ROOT || fastify.env.FS_SERVER_ROOT).gotoFile(`${!fastify.env.FS_FILES_ROOT ? 'files/' : ''}chart/${song.chartFileHash}.${song.isChart ? 'chart' : 'mid'}`),
 			getYARGReplayValidatorPath: () => {
 				const ext = process.platform === 'win32' ? 'exe' : 'dll'
 				return serverRoot(fastify.env.FS_SERVER_ROOT).gotoFile(`${fastify.isDev() ? 'src' : 'dist'}/bin/YARGReplayValidator.${ext}`)
@@ -52,7 +52,7 @@ export class FileSystem {
 		return `${timestamp}_${random.toUpperCase()}${extension ? (extension.startsWith('.') ? extension : `.${extension}`) : ''}`
 	}
 
-	static async createSongRegisterTempPaths(req: FastifyRequest) {
+	static async genFileRegisterTempPaths(req: FastifyRequest) {
 		const temp = req.server.fs.tempDir()
 		const uid = await this.genUniqueFilename()
 

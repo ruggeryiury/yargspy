@@ -140,6 +140,7 @@ pnpm-lock.yaml
 backend/public/
 backend/files/
 backend/temp/
+backend/*.MD
 
 # Test folder junk
 backend/tests/
@@ -151,5 +152,3 @@ YARGReplayWatcher/config.ini
 
 # For now, gonna hide the watcher
 YARGReplayWatcher/
-
-backend/*.MD

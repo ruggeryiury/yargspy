@@ -9,6 +9,7 @@ import { genericServerResponse, songRegisterBody } from '@schemas'
 
 import { YARGSPY } from '../../constants'
 import { userBearerAuth } from '../../core/services/Auth'
+import { FileIntegrity } from '../../core/services/FileIntegrity'
 import { FileSystem } from '../../core/services/FileSystem'
 import { ServerError, success } from '../../core/services/ServerResponse'
 import { Swagger } from '../../core/services/Swagger'
@@ -40,13 +41,13 @@ export const songRegister = fp(async (fastify) => {
 			preHandler: fastify.auth([userBearerAuth({ admin: true })]),
 		},
 		async (req, reply) => {
-			const { chartTemp, deleteAllTempFiles, dtaTemp, iniTemp, midiTemp, updateTemp, upgradeTemp } = await FileSystem.createSongRegisterTempPaths(req)
+			const { chartTemp, deleteAllTempFiles, dtaTemp, iniTemp, midiTemp, updateTemp, upgradeTemp } = await FileSystem.genFileRegisterTempPaths(req)
 
 			let chart: FilePath | undefined, songData: FilePath | undefined, update: FilePath | undefined, upgrade: FilePath | undefined
 			const incomingStreams: Promise<void>[] = []
 
 			try {
-				const parts = req.parts({ limits: { fileSize: parseReadableBytesSize('2MB'), files: 4, fields: 0 } })
+				const parts = req.parts({ limits: { fileSize: parseReadableBytesSize('2MB'), files: 4, fields: 0, parts: 4 } })
 
 				for await (const part of parts) {
 					if (part.type === 'file') {
@@ -57,12 +58,18 @@ export const songRegister = fp(async (fastify) => {
 							if (ext === 'mid' || ext === 'midi') selectedTempPath = midiTemp
 							else if (ext === 'chart') selectedTempPath = chartTemp
 						} else if (part.fieldname === 'songDataFile') {
-							if (ext === 'ini') selectedTempPath = iniTemp
-							else if (ext === 'dta') selectedTempPath = dtaTemp
-						} else if (part.fieldname === 'updateFile' && (ext === 'mid' || ext === 'midi')) selectedTempPath = updateTemp
-						else if (part.fieldname === 'upgradeFile' && (ext === 'mid' || ext === 'midi')) selectedTempPath = upgradeTemp
+							if (ext === 'ini') {
+								selectedTempPath = iniTemp
+							} else if (ext === 'dta') {
+								selectedTempPath = dtaTemp
+							}
+						} else if (part.fieldname === 'updateFile' && (ext === 'mid' || ext === 'midi')) {
+							selectedTempPath = updateTemp
+						} else if (part.fieldname === 'upgradeFile' && (ext === 'mid' || ext === 'midi')) {
+							selectedTempPath = upgradeTemp
+						}
 
-						if (!selectedTempPath) throw new Error('aksjdksj')
+						if (!selectedTempPath) throw new ServerError('err_file_register_bad_request')
 
 						if (part.fieldname === 'chartFile') chart = selectedTempPath
 						else if (part.fieldname === 'songDataFile') songData = selectedTempPath
@@ -71,58 +78,54 @@ export const songRegister = fp(async (fastify) => {
 
 						// Pipeline has to be sync to avoid race conditions with the underlying busboy parser
 						incomingStreams.push(pipeline(part.file, selectedTempPath.createWriteStreamSync()))
+
+						if (part.file.truncated) {
+							await deleteAllTempFiles()
+							throw new ServerError('err_song_register_payload_too_large')
+						}
 					}
 				}
 
 				await Promise.all(incomingStreams)
 
 				// TODO: Implement SONGS_UPDATES/SONGS_UPGRADES
-				if (update || upgrade) throw new ServerError({ code: 'err_not_implemented', messageValues: { feature: 'songs_updates/songs_upgrades' } })
+				if (update || upgrade) throw new ServerError({ code: 'err_not_implemented', messageValues: { feature: 'Songs updates/upgrades merging and parsing' } })
 
 				// These files are required
 				if (!chart || !songData) throw new ServerError('err_register_songdata_required')
 
 				// Checking the existence of the same song on the database
 				const chartFileHash = await chart.generateHash('sha1')
-				// if (await fastify.dbFuncs.songs.findByChartFileHash(chartFileHash)) throw new ServerError('err_register_duplicated_song')
+				if (await fastify.dbFuncs.songs.findByChartFileHash(chartFileHash)) throw new ServerError('err_register_duplicated_song')
 
-				// Check chart files integrity
-				if (midiTemp.exists) {
-					const midSignature = (await midiTemp.readOffset(0, 4)).toString()
-					if (midSignature !== 'MThd') throw new ServerError('err_replay_invalid_midi_file')
-				}
-
-				if (chartTemp.exists) {
-					let chartSignature = (await chartTemp.readOffset(0, 9)).toString('hex')
-
-					// Excluding BOM from UTF-8 files (if any)
-					if (chartSignature.startsWith('efbbbf')) chartSignature = Buffer.from(chartSignature.substring(6), 'hex').toString()
-					if (chartSignature.toLowerCase() !== '[song]') throw new ServerError('err_replay_invalid_chart_file')
-				}
+				// Check provided files integrity
+				await FileIntegrity.checkChartFiles(midiTemp, chartTemp)
 
 				const entryOpts = await createNewSongEntry(req, chart, chartFileHash, songData)
-				const validatorSongData = await YARGReplayValidatorAPI.getSongData(req, chart, entryOpts.song, entryOpts.eighthNoteHopo, entryOpts.hopoFreq)
+				const validatorSongData = await YARGReplayValidatorAPI.getSongDataFromChartFile(req, chart, entryOpts.song, entryOpts.eighthNoteHopo, entryOpts.hopoFreq)
 
 				if (entryOpts.song.hopoFrequency === undefined && validatorSongData.HopoFrequency >= 0) entryOpts.song.hopoFrequency = validatorSongData.HopoFrequency
-				for (const instrValue of Object.keys(validatorSongData.ChartData.NoteCount)) {
-					const instrNum = Number(instrValue) as (typeof YARGSPY.Instrument)[keyof typeof YARGSPY.Instrument]
-					for (const diffValue of Object.keys(validatorSongData.ChartData.NoteCount[instrValue])) {
-						const diffNum = Number(diffValue) as (typeof YARGSPY.Difficulty)[keyof typeof YARGSPY.Difficulty]
-						const noteCountArray = validatorSongData.ChartData.NoteCount[instrValue][diffValue]
+				const instrKeys = Object.keys(validatorSongData.ChartData.NoteCount).map((val) => z.coerce.number().int().parse(val)) as (typeof YARGSPY.Instrument)[keyof typeof YARGSPY.Instrument][]
+				for (const instrKey of instrKeys) {
+					const diffKeys = Object.keys(validatorSongData.ChartData.NoteCount[instrKey]).map((val) => z.coerce.number().int().parse(val)) as (typeof YARGSPY.Difficulty)[keyof typeof YARGSPY.Difficulty][]
+
+					for (const diffKey of diffKeys) {
+						const noteCountArray = validatorSongData.ChartData.NoteCount[instrKey][diffKey]
 						entryOpts.song.availableInstruments.push({
-							instrument: instrNum,
-							difficulty: diffNum,
+							instrument: instrKey,
+							difficulty: diffKey,
 							notes: noteCountArray[0], // Chord-based noteCount for 5L
 							notes5LK: noteCountArray[1] ?? undefined, // Note-based noteCount for 5L, undefined for other instrument types
-							starPowerPhrases: validatorSongData.ChartData.StarPowerCount[instrValue][diffValue],
+							starPowerPhrases: validatorSongData.ChartData.StarPowerCount[instrKey][diffKey],
 						})
 					}
 				}
 
 				if (fastify.env.DISABLE_AWS) {
-					await chart.copy(fastify.fs.filesDir().gotoFile(`chart/${entryOpts.song.chartFileHash}${entryOpts.song.isChart ? '.chart' : '.mid'}`))
+					await chart.copy(fastify.fs.getChartFile(entryOpts.song))
 				} else {
-					// S3 logic
+					// TO-DO: Implement AWS file hosting logic
+					throw new ServerError({ code: 'err_not_implemented', messageValues: { feature: 'AWS for file hosting' } })
 				}
 
 				// Delete DTA/INI (might consider not delete this)
@@ -145,6 +148,7 @@ export const songRegister = fp(async (fastify) => {
 
 				return success<z.infer<typeof songRegisterSuccessData.shape.data>>(req, reply, { code: 'created', data: { song: entryOpts.song._id } })
 			} catch (err) {
+				if (err instanceof fastify.multipartErrors.RequestFileTooLargeError) throw new ServerError('err_song_register_payload_too_large')
 				await deleteAllTempFiles()
 				throw err
 			}
