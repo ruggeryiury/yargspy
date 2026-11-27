@@ -1,6 +1,36 @@
 import axios from 'axios'
 
-import { type AdminEntriesSuccessData, type EmailVerificationResendBody, type EmailVerifyBody, type GenericServerResponse, type GetSongDetailsSuccessData, type GetSongLeaderboardsQuerystring, type GetSongLeaderboardsSuccessData, type GetUserDetailsSuccessData, type PatchUserStatusBody, type PatchUserStatusSuccessData, type ScoreDeleteQuerystring, type ScoreDeleteSuccessData, type SerializedObjectId, type SongDeleteQuerystring, type SongRegisterSuccessData, type SongResolveQuerystring, type SongResolveSuccessData, type SongUpdateBody, type TokenString, type UserEntriesQuerystring, type UserEntriesSuccessData, type UserLoginBody, type UserLoginSuccessData, type UserRegisterBody, type UserResolveSuccessData, type UserScoresQuerystring, type UserScoresSuccessData } from '@schemas'
+import {
+	type AdminEntriesSuccessData,
+	type EmailVerificationResendBody,
+	type EmailVerifyBody,
+	type GenericServerResponse,
+	type GetSongDetailsSuccessData,
+	type GetSongLeaderboardsQuerystring,
+	type GetSongLeaderboardsSuccessData,
+	type GetUserDetailsSuccessData,
+	type PatchUserStatusBody,
+	type PatchUserStatusSuccessData,
+	type RequestPasswordChangeBody,
+	type RequestPasswordConfirmBody,
+	type ScoreDeleteQuerystring,
+	type ScoreDeleteSuccessData,
+	type SerializedObjectId,
+	type SongDeleteQuerystring,
+	type SongRegisterSuccessData,
+	type SongResolveQuerystring,
+	type SongResolveSuccessData,
+	type SongUpdateBody,
+	type TokenString,
+	type UserEntriesQuerystring,
+	type UserEntriesSuccessData,
+	type UserLoginBody,
+	type UserLoginSuccessData,
+	type UserRegisterBody,
+	type UserResolveSuccessData,
+	type UserScoresQuerystring,
+	type UserScoresSuccessData,
+} from '@schemas'
 
 import { scoreRegisterSuccessData } from './schemas/scores/scoreRegister.schemas'
 
@@ -18,7 +48,8 @@ export const serverAPI = {
 		verify: (body: EmailVerifyBody) => serverAxios.post<GenericServerResponse>('email-verification/verify', body),
 	},
 	passwordReset: {
-		change: () => serverAxios.post(''),
+		change: (body: RequestPasswordChangeBody) => serverAxios.post<GenericServerResponse>('password-reset/change', body),
+		confirm: (body: RequestPasswordConfirmBody) => serverAxios.post<GenericServerResponse>('password-reset/confirm', body),
 	},
 	scores: {
 		delete: (token: TokenString, scoreId: SerializedObjectId, params: ScoreDeleteQuerystring) => serverAxios.delete<ScoreDeleteSuccessData>(`scores/${scoreId}`, { params, headers: { Authorization: `Bearer ${token}` } }),
