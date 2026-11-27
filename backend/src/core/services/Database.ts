@@ -1,14 +1,21 @@
 import bcrypt from 'bcryptjs'
 import fp from 'fastify-plugin'
 import { type Collection, type InsertOneResult, ObjectId } from 'mongodb'
-import { randomBytesFromRanges } from 'node-lib'
-import { createHash } from 'node:crypto'
+import { createHashFromBuffer, randomBytesFromRanges } from 'node-lib'
 import z from 'zod'
 
 import { validatePassword } from '@lib/validators/validatePassword'
+import { genericEmail, genericPassword, genericUsername } from '@schemas'
 
 import { YARGSPY } from '../../constants'
 import { ServerError } from './ServerResponse'
+
+// #region Types
+export interface EmailTokenIssueObject {
+	document: InsertOneResult<EmailTokenModel>
+	token: string
+	tokenHash: string
+}
 
 // #region Declarations
 declare module 'fastify' {
@@ -109,7 +116,8 @@ declare module 'fastify' {
 				findByReplayFileHash: (replayFileHash: string) => Promise<ScoreModel | null>
 			}
 			emailTokens: {
-				issue: (id: string | ObjectId, purpose: 'reset' | 'verify') => Promise<{ document: InsertOneResult<{ _id: ObjectId; user: ObjectId; purpose: 0 | 1; tokenHash: string; expiresAt: Date; usedAt?: Date | undefined }>; token: string; tokenHash: string }>
+				issue: (id: string | ObjectId, purpose: 'reset' | 'verify') => Promise<EmailTokenIssueObject>
+				consume: (token: string, purpose: 'reset' | 'verify') => Promise<EmailTokenModel | null>
 			}
 		}
 	}
@@ -118,11 +126,11 @@ declare module 'fastify' {
 // #region Models
 export const userModel = z.object({
 	_id: z.instanceof(ObjectId),
-	username: z.string().min(3).max(32),
+	username: genericUsername,
 	usernameSearch: z.string(),
 	usernameSort: z.string(),
-	email: z.email(),
-	password: z.string(),
+	email: genericEmail,
+	password: genericPassword,
 	emailVerified: z.boolean(),
 	active: z.boolean(),
 	admin: z.boolean(),
@@ -189,7 +197,7 @@ export const emailTokenModel = z.object({
 	 * Reset: 1
 	 */
 	purpose: z.enum(YARGSPY.EmailTokenPurpose),
-	tokenHash: z.hash('sha256'),
+	tokenHash: z.base64url(),
 	usedAt: z.date().optional(),
 	expiresAt: z.date(),
 })
@@ -435,8 +443,9 @@ export const DatabasePlugin = fp(async (fastify) => {
 		},
 		emailTokens: {
 			issue: async (id, purpose) => {
-				const token = (await randomBytesFromRanges(32)).toString('base64url')
-				const tokenHash = createHash('sha256').update(token).digest('base64url')
+				const tokenBuffer = await randomBytesFromRanges(32)
+				const token = tokenBuffer.toString('base64url')
+				const tokenHash = createHashFromBuffer(tokenBuffer, 'sha256', 'base64url')
 				const ttl = purpose === 'verify' ? 60 : 30
 
 				const document = await fastify.db.emailTokens.insertOne({
@@ -448,6 +457,27 @@ export const DatabasePlugin = fp(async (fastify) => {
 				})
 
 				return { document, token, tokenHash }
+			},
+			consume: async (token, purpose) => {
+				const tokenHash = createHashFromBuffer(Buffer.from(token, 'base64url'), 'sha256', 'base64url')
+				const now = new Date()
+				const p = purpose === 'verify' ? 0 : 1
+				const document = await fastify.db.emailTokens.findOneAndUpdate(
+					{
+						purpose: p,
+						tokenHash,
+						usedAt: { $exists: true },
+						expiresAt: { $gt: now },
+					},
+					{
+						$set: {
+							usedAt: now,
+						},
+					},
+					{ returnDocument: 'after' },
+				)
+
+				return document
 			},
 		},
 	})

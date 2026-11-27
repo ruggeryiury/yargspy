@@ -1,11 +1,11 @@
 import z from 'zod'
 
-import { tokenString } from '../globals'
+import { genericEmail, genericPassword, tokenString } from '../globals'
 import { genericServerResponse } from '../response'
 
 export const userLoginBody = z.object({
-	username: z.string().min(3).max(32),
-	password: z.string().min(8).max(48),
+	email: genericEmail,
+	password: genericPassword,
 })
 export type UserLoginBody = z.infer<typeof userLoginBody>
 

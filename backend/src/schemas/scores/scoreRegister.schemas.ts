@@ -1,6 +1,7 @@
 import z from 'zod'
 
 import { YARGSPY } from '../../constants'
+import { serializedObjectId } from '../globals'
 import { genericServerResponse } from '../response'
 
 export const scoreRegisterBody = z.object({
@@ -18,6 +19,8 @@ export const scoreRegisterBodyNoFile = scoreRegisterBody.pick({ reqType: true })
 export type ScoreRegisterBodyNoFile = z.infer<typeof scoreRegisterBodyNoFile>
 
 export const scoreRegisterSuccessData = genericServerResponse.extend({
-	data: z.object({}),
+	data: z.object({
+		song: serializedObjectId,
+	}),
 })
 export type scoreRegisterSuccessData = z.infer<typeof scoreRegisterSuccessData>

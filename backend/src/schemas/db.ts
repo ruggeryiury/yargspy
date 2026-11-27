@@ -1,15 +1,15 @@
 import z from 'zod'
 
 import { YARGSPY } from '../constants'
-import { serializedObjectId } from './globals'
+import { genericEmail, genericPassword, genericUsername, serializedObjectId } from './globals'
 
 export const userDocument = z.object({
 	_id: serializedObjectId,
-	username: z.string().min(3).max(32),
+	username: genericUsername,
 	usernameSearch: z.string(),
 	usernameSort: z.string(),
-	email: z.email(),
-	password: z.string(),
+	email: genericEmail,
+	password: genericPassword,
 	emailVerified: z.boolean(),
 	active: z.boolean(),
 	admin: z.boolean(),
@@ -76,7 +76,7 @@ export const emailTokenDocument = z.object({
 	 * Reset: 1
 	 */
 	purpose: z.enum(YARGSPY.EmailTokenPurpose),
-	tokenHash: z.hash('sha256'),
+	tokenHash: z.base64url(),
 	usedAt: z.iso.datetime().optional(),
 	expiresAt: z.iso.datetime(),
 })

@@ -5,7 +5,7 @@ export const songUpdateBody = z.object({
 	artist: z.string().optional(),
 	charter: z.string().optional(),
 	album: z.string().optional(),
-	year: z.string().optional(),
+	year: z.number().int().optional(),
 	proDrums: z.boolean().optional(),
 	fiveLaneDrums: z.boolean().optional(),
 	sustainCutoffThreshold: z.number().optional(),

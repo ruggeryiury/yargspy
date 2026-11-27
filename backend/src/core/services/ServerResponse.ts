@@ -173,6 +173,13 @@ export const serverCodeMap = {
 	user_already_banned: [200, 'User is already banned'],
 	err_register_band_score_zeroed: [400, 'Provided score is zeroed on all played instruments'],
 	err_replay_no_valid_players: [400, 'Provided YARG REPLAY file only contains players that played using custom engines unsupported by the server'],
+	resend_verification_email_accepted: [200, 'If this account exists and needs verification, a new e-mail has been sent'],
+	password_change_req_accepted: [200, 'If an account with that email exists, a password reset link has been sent'],
+	err_invalid_auth_token: [401, 'Provided authorization token is invalid'],
+	email_verification_success: [200, 'Your e-mail has been successfully verified'],
+	password_reset_success: [200, 'Your password has been successfully reset'],
+	reset_password_disabled: [503, 'The password reset function is disabled momentarily. Please try again later'],
+	email_verification_disabled: [503, 'The e-mail verification function is disabled momentarily. Please try again later'],
 
 	// Generic codes
 	ok: [200, 'OK'],
@@ -190,6 +197,7 @@ export const serverCodeMap = {
 	internal_server_error: [500, 'An unknown error occurred'],
 	unknown_server_error: [500, 'An unknown error occurred'],
 	not_implemented: [501, 'Not Implemented'],
+	service_unavailable: [503, 'Service Unavailable'],
 } satisfies CodeMapObject
 
 export type ReplyCodeNames = keyof typeof serverCodeMap

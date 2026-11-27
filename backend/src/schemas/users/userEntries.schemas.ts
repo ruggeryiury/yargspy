@@ -5,7 +5,6 @@ import { genericPaginationObject } from '../globals'
 import { genericServerResponse } from '../response'
 
 export const userEntriesQuerystring = z.object({
-	username: z.string().min(3).max(32).optional().default(''),
 	page: z.coerce.number().int().positive().default(1),
 	limit: z.coerce.number().int().positive().default(15),
 })

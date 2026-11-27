@@ -119,3 +119,8 @@ export const genericPaginationObject = z.object({
 	hasPreviousPage: z.boolean(),
 })
 export type GenericPaginationObject = z.infer<typeof genericPaginationObject>
+
+// #region genericEmail
+export const genericEmail = z.email().transform((val) => val.toLowerCase())
+export const genericUsername = z.string().min(3).max(32)
+export const genericPassword = z.string().min(8).max(48)

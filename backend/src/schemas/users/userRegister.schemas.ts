@@ -1,9 +1,11 @@
 import z from 'zod'
 
+import { genericEmail, genericPassword, genericUsername } from '../globals'
+
 export const userRegisterBody = z.object({
-	username: z.string().min(3).max(32),
-	email: z.email().transform((val) => val.toLowerCase()),
-	password: z.string().min(8).max(48),
+	username: genericUsername,
+	email: genericEmail,
+	password: genericPassword,
 	h: z.object({
 		captcha: z.object({
 			response: z.string(),

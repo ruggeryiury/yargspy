@@ -78,13 +78,15 @@ export class ServerInit {
 				openapi: {
 					openapi: '3.0.0',
 					info: {
-						title: 'YARGSpy',
-						version: '0.1',
-						description: 'YARGSpy API',
+						title: 'YARGSpy API',
+						version: '0.1.0',
+						description: 'An unofficial YARG leaderboard with REPLAY file validation.',
 					},
 					servers: [{ url: 'http://localhost:5000', description: 'Development server' }],
 					tags: [
 						{ name: 'Login/Register', description: 'Endpoints to register and authorize users to the system' },
+						{ name: 'E-mail Verification', description: 'Endpoints to verify and resend verification tokens' },
+						{ name: 'Password Reset', description: 'Endpoints to change and confirm password reset requests' },
 						{ name: 'Admin', description: 'Endpoints related to administrator data and operations' },
 						{ name: 'Users', description: 'Endpoints related to user data and operations' },
 						{ name: 'Scores', description: 'Endpoints related to score data and operations' },

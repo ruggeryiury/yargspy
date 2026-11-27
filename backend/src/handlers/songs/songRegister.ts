@@ -28,6 +28,8 @@ export const songRegister = fp(async (fastify) => {
 				consumes: ['multipart/form-data'],
 				response: {
 					200: Swagger.replySchema('ok', songRegisterSuccessData.shape.data).describe('Default response'),
+					403: Swagger.replySchema('forbidden').describe('User banned for the server, or with no administrator rights'),
+					413: Swagger.replySchema('payload_too_large').describe('All files size surpassing the 2MB size limit of the route'),
 					422: Swagger.replySchema('unprocessable_entity').describe('Song missing its chart/metadata file(s) to be processed, invalid signature of provided files'),
 					501: Swagger.replySchema('not_implemented').describe('Trying to upload a song with chart updates. Chart merging is still not implemented on the server'),
 				},

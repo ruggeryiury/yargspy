@@ -17,7 +17,7 @@ import { Swagger } from '../../core/services/Swagger'
 import { YARGReplayValidatorAPI } from '../../core/services/YARGReplayValidatorAPI'
 import { scoreRegisterBody, scoreRegisterBodyNoFile } from '../../schemas/scores/scoreRegister.schemas'
 
-export const scoreRegisterSuccessData = genericServerResponse.extend({
+const scoreRegisterSuccessData = genericServerResponse.extend({
 	data: z.object({
 		song: z.instanceof(ObjectId),
 	}),
@@ -33,8 +33,9 @@ export const scoreRegister = fp(async (fastify) => {
 				response: {
 					201: Swagger.replySchema('created', scoreRegisterSuccessData.shape.data).describe('Default response'),
 					400: Swagger.replySchema('bad_request').describe('Bad request body fields naming, provided CHART/MIDI file does not match REPLAY chart file hash'),
+					403: Swagger.replySchema('forbidden').describe('User banned for the server'),
 					409: Swagger.replySchema('conflict').describe('Provided score is already registered on the database'),
-					413: Swagger.replySchema('payload_too_large').describe('All files size surpassing the 2MB size limit of the route'),
+					413: Swagger.replySchema('payload_too_large').describe('All files size surpassing the 16MB size limit of the route'),
 					422: Swagger.replySchema('unprocessable_entity').describe('REPLAY register requires song chart and metadata files, invalid REPLAY, CHART/MIDI and/or INI/DTA file signature'),
 					501: Swagger.replySchema('not_implemented').describe('Trying to upload scores of songs with songs_updates/songs_upgrades'),
 				},

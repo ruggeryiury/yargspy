@@ -9,7 +9,7 @@ import { ServerError, success } from '../../core/services/ServerResponse'
 import { Swagger } from '../../core/services/Swagger'
 import { type GetSongLeaderboardsQuerystring, getSongLeaderboardsQuerystring } from '../../schemas/songs/getLeaderboards.schemas'
 
-export const getSongLeaderboardsSuccessData = genericServerResponse.extend({
+const getSongLeaderboardsSuccessData = genericServerResponse.extend({
 	data: z.object({
 		pagination: genericPaginationObject,
 		entries: z.array(

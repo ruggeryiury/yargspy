@@ -1,6 +1,8 @@
 import type { FastifyInstance } from 'fastify'
 
 import { adminEntries } from '../../handlers/admin/adminEntries'
+import { emailVerificationResend } from '../../handlers/email-verification/emailVerificationResend'
+import { emailVerify } from '../../handlers/email-verification/emailVerify'
 import { scoreDelete } from '../../handlers/scores/scoreDelete'
 import { scoreRegister } from '../../handlers/scores/scoreRegister'
 import { getSongLeaderboards } from '../../handlers/songs/getLeaderboards'
@@ -21,6 +23,12 @@ export class ServerRoutes {
 	static async init(app: FastifyInstance) {
 		// Admin
 		await app.register(adminEntries)
+
+		// E-mail verification
+		await app.register(emailVerificationResend)
+		await app.register(emailVerify)
+
+		// Password reset
 
 		// Scores
 		await app.register(scoreDelete)

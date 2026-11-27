@@ -48,7 +48,7 @@ export const songUpdate = fp(async (app) => {
 			if (artist !== undefined) songUpdate.artist = artist
 			if (charter !== undefined) songUpdate.charter = charter
 			if (album !== undefined) songUpdate.album = album
-			if (year !== undefined && !Number.isNaN(Number(year))) songUpdate.year = Number(year)
+			if (year !== undefined) songUpdate.year = year
 			if (proDrums !== undefined) songUpdate.proDrums = proDrums
 			if (fiveLaneDrums !== undefined) songUpdate.fiveLaneDrums = fiveLaneDrums
 			if (sustainCutoffThreshold !== undefined) songUpdate.sustainCutoffThreshold = sustainCutoffThreshold

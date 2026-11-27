@@ -1,8 +1,7 @@
 import fp from 'fastify-plugin'
 import z from 'zod'
 
-import { normalizeStr } from '@lib/utils/strnum'
-import { type UserEntriesQuerystring, genericPaginationObject, genericServerResponse, userEntriesQuerystring } from '@schemas'
+import { type GenericIdParams, type UserEntriesQuerystring, genericIdParams, genericPaginationObject, genericServerResponse, userEntriesQuerystring } from '@schemas'
 
 import { publicUserModel } from '../../core/services/Database'
 import { success } from '../../core/services/ServerResponse'
@@ -16,8 +15,8 @@ const userEntriesSuccessData = genericServerResponse.extend({
 })
 
 export const userEntries = fp(async (fastify) => {
-	fastify.get<{ Querystring: UserEntriesQuerystring }>(
-		'/v1/users/entries',
+	fastify.get<{ Querystring: UserEntriesQuerystring; Params: GenericIdParams }>(
+		'/v1/users/:id/entries',
 		{
 			schema: {
 				tags: ['Users'],
@@ -27,13 +26,15 @@ export const userEntries = fp(async (fastify) => {
 					422: Swagger.replySchema('validation_error').describe('Request body with validation errors, wrong entry ID format'),
 				},
 				querystring: userEntriesQuerystring,
+				params: genericIdParams,
 			},
 		},
 		async (req, reply) => {
-			const { limit, page, username } = req.query
+			const { id } = req.params
+			const { limit, page } = req.query
 			const skip = (page - 1) * limit
 
-			const filter = { usernameSearch: { $regex: normalizeStr(username) }, active: true }
+			const filter = { _id: new fastify.mongo.ObjectId(id), active: true }
 			const [entries, totalResults] = await Promise.all([fastify.db.users.find(filter).skip(skip).limit(limit).toArray(), fastify.db.users.countDocuments(filter)])
 
 			const totalPages = Math.ceil(totalResults / limit)

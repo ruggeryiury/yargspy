@@ -5,7 +5,14 @@ export * from './schemas/response'
 
 export * from './schemas/admin/adminEntries.schemas'
 
+export * from './schemas/email-verification/emailVerificationResend.schemas'
+export * from './schemas/email-verification/emailVerify.schemas'
+
+export * from './schemas/password-reset/requestPasswordChange.schemas'
+export * from './schemas/password-reset/requestPasswordConfirm.schemas'
+
 export * from './schemas/scores/scoreDelete.schemas'
+export * from './schemas/scores/scoreRegister.schemas'
 
 export * from './schemas/songs/getLeaderboards.schemas'
 export * from './schemas/songs/getSongDetails.schemas'
