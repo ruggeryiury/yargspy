@@ -30,7 +30,7 @@ export interface UserBearerAuthFunctionOptions {
 }
 
 /**
- * A wrapper that generates bearer authorization functions for a specific route. Returns a new function that handlers bearer token authorization.
+ * A wrapper that generates bearer authorization functions for a specific route.
  * - - - -
  * @param {UserBearerAuthFunctionOptions} [options] `OPTIONAL` An object with options that tweaks the generated authorization function rules of the returned authorization function.
  * @returns {FastifyAuthFunction}

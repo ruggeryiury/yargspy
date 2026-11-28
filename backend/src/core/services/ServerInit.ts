@@ -22,14 +22,27 @@ import { MailerPlugin } from './MailerPlugin'
 import { ServerEnv } from './ServerEnv'
 import { ServerError } from './ServerResponse'
 
+/**
+ * A class with static methods that initializes all the server's functionality.
+ */
 export class ServerInit {
-	static initSerializersAndValidators(app: FastifyInstance) {
+	/**
+	 * Settles the server's schema validator and serializer.
+	 * - - - -
+	 * @param {FastifyInstance} app The Fastify instance of the server.
+	 */
+	static initSerializersAndValidators(app: FastifyInstance): void {
 		// Validator and serizalizer init
 		app.setValidatorCompiler(validatorCompiler)
 		app.setSerializerCompiler(serializerCompiler)
 	}
 
-	static async initFastifyEcosystemPlugins(app: FastifyInstance) {
+	/**
+	 * Initializes all the official plugins from the Fastify ecosystem.
+	 * - - - -
+	 * @param {FastifyInstance} app The Fastify instance of the server.
+	 */
+	static async initFastifyEcosystemPlugins(app: FastifyInstance): Promise<void> {
 		// Validate env
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { $schema: _, ...envSchema } = z.toJSONSchema(serverEnvObject)
@@ -63,6 +76,11 @@ export class ServerInit {
 		})
 	}
 
+	/**
+	 * Initializes all the plugins created specifically for the server.
+	 * - - - -
+	 * @param {FastifyInstance} app The Fastify instance of the server.
+	 */
 	static async initServerEcosystemPlugins(app: FastifyInstance) {
 		await app.register(ServerEnv)
 		await app.register(DatabasePlugin)
@@ -71,6 +89,11 @@ export class ServerInit {
 		await app.register(FileSystem.plugin)
 	}
 
+	/**
+	 * Initializes the Swagger documentation page plugin.
+	 * - - - -
+	 * @param {FastifyInstance} app The Fastify instance of the server.
+	 */
 	static async initSwaggerUI(app: FastifyInstance) {
 		if (app.isDev === undefined) throw new Error('Swagger Plugin init error: NodeEnvPlugin needs to be initialized, please init ServerInit.initServerPlugins() and make sure NoveEnvPlugin is initialized there')
 		if (app.isDev()) {
@@ -111,6 +134,11 @@ export class ServerInit {
 		}
 	}
 
+	/**
+	 * Initializes all the server systems.
+	 * - - - -
+	 * @param {FastifyInstance} app The Fastify instance of the server.
+	 */
 	static async init(app: FastifyInstance) {
 		this.initSerializersAndValidators(app)
 		await this.initFastifyEcosystemPlugins(app)

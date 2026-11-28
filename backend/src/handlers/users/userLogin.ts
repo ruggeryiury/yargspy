@@ -24,10 +24,10 @@ export const userLogin = fp(async (fastify) => {
 			},
 		},
 		async (req, reply) => {
-			const { password, email } = req.body
+			const { password, username } = req.body
 
 			// Check the existence of the user. Unregistered, inactive (banned) and unverified users won't be able to login
-			const user = await fastify.dbFuncs.users.findByEmail(email)
+			const user = await fastify.dbFuncs.users.findByUsername(username)
 			if (!user) throw new ServerError('err_user_not_found')
 			if (!user.active) throw new ServerError('err_banned_user')
 			if (!user.emailVerified) throw new ServerError('err_email_not_verified')

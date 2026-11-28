@@ -7,6 +7,11 @@ declare module 'fastify' {
 	}
 }
 
+/**
+ * ## Mailer Plugin
+ *
+ * Creates a NodeMailer's instance with configurations provided on the server's environment variables and serve it as a server's decorator.
+ */
 export const MailerPlugin = fp(async (fastify) => {
 	if (!fastify.env.DISABLE_MAIL_SERVICE) {
 		const transporter = nodemailer.createTransport({

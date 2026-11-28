@@ -272,6 +272,13 @@ export class ServerError extends Error {
 	}
 }
 
+/**
+ * Sends a standardized route response.
+ * - - - -
+ * @param {FastifyRequest} _ The server's request instance.
+ * @param {FastifyReply} reply The server's reply instance.
+ * @param {ServerErrorCodeType | ServerErrorOptions<T>} options A return code (as string) or an object with options to set the behavior of the response.
+ */
 export function success<T extends Record<string, unknown>>(_: FastifyRequest, reply: FastifyReply, options: ServerErrorCodeType | ServerErrorOptions<T>) {
 	if (typeof options === 'string') {
 		const message = options in serverCodeMap ? serverCodeMap[options as ReplyCodeNames][1] : serverCodeMap.unknown_server_error[1]

@@ -40,6 +40,7 @@ export const serverAPI = {
 	admin: {
 		/**
 		 * Returns a list of all the registered users with administrator rights.
+		 * @param {TokenString} token A valid access token string.
 		 */
 		entries: (token: TokenString) => serverAxios.get<AdminEntriesSuccessData>('admin/entries', { headers: { Authorization: `Bearer ${token}` } }),
 	},

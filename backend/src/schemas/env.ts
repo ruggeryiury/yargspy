@@ -5,8 +5,11 @@ import { serializedObjectId } from './globals'
 // ---------------------------------------------------------------------------------------------------------
 export const serverEnvObject = z.object({
 	// Server configuration
-	NODE_ENV: z.union([z.literal('development'), z.literal('production')]),
-	PORT: z.number().positive(),
+	NODE_ENV: z
+		.union([z.literal('development'), z.literal('production')])
+		.optional()
+		.default('production'),
+	PORT: z.number().positive().optional().default(5000),
 	HOST: z.string().optional(),
 	JWT_SECRET: z.string(),
 	HCAPTCHA_SECRET: z.string(),

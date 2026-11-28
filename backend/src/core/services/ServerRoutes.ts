@@ -3,6 +3,8 @@ import type { FastifyInstance } from 'fastify'
 import { adminEntries } from '../../handlers/admin/adminEntries'
 import { emailVerificationResend } from '../../handlers/email-verification/emailVerificationResend'
 import { emailVerify } from '../../handlers/email-verification/emailVerify'
+import { requestPasswordChange } from '../../handlers/password-reset/requestPasswordChange'
+import { requestPasswordConfirm } from '../../handlers/password-reset/requestPasswordConfirm'
 import { scoreDelete } from '../../handlers/scores/scoreDelete'
 import { scoreRegister } from '../../handlers/scores/scoreRegister'
 import { getSongLeaderboards } from '../../handlers/songs/getLeaderboards'
@@ -19,7 +21,15 @@ import { userRegister } from '../../handlers/users/userRegister'
 import { userResolve } from '../../handlers/users/userResolve'
 import { userScores } from '../../handlers/users/userScores'
 
+/**
+ * A class with static methods related to server routing.
+ */
 export class ServerRoutes {
+	/**
+	 * Initializes all the server routes.
+	 * - - - -
+	 * @param {FastifyInstance} app The Fastify instance of the server.
+	 */
 	static async init(app: FastifyInstance) {
 		// Admin
 		await app.register(adminEntries)
@@ -29,6 +39,8 @@ export class ServerRoutes {
 		await app.register(emailVerify)
 
 		// Password reset
+		await app.register(requestPasswordChange)
+		await app.register(requestPasswordConfirm)
 
 		// Scores
 		await app.register(scoreDelete)

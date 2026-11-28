@@ -21,7 +21,26 @@ declare module 'fastify' {
 	}
 }
 
+export interface FileRegisterTempPathsObject {
+	replayTemp: FilePath
+	midiTemp: FilePath
+	chartTemp: FilePath
+	iniTemp: FilePath
+	dtaTemp: FilePath
+	updateTemp: FilePath
+	upgradeTemp: FilePath
+	deleteAllTempFiles: () => Promise<void>
+}
+
+/**
+ * A class with static methods related to the server file system.
+ */
 export class FileSystem {
+	/**
+	 * ## File System Plugin
+	 *
+	 * Creates folders used by the server and decorates the server's instance with quick file system resolvers.
+	 */
 	static plugin = fp(async (fastify): Promise<void> => {
 		const temp = serverRoot(fastify.env.FS_SERVER_ROOT).gotoDir('temp')
 		const replays = serverRoot(fastify.env.FS_FILES_ROOT || fastify.env.FS_SERVER_ROOT).gotoDir('files/replay')
@@ -46,13 +65,25 @@ export class FileSystem {
 		})
 	})
 
+	/**
+	 * Generates a unique filename.
+	 * - - - -
+	 * @param extension The extension of the new file. Default is no extension.
+	 * @returns {Promise<string>}
+	 */
 	static async genUniqueFilename(extension?: string): Promise<string> {
 		const timestamp = Date.now().toString()
 		const random = (await randomBytesFromRanges(3)).toString('hex')
 		return `${timestamp}_${random.toUpperCase()}${extension ? (extension.startsWith('.') ? extension : `.${extension}`) : ''}`
 	}
 
-	static async genFileRegisterTempPaths(req: FastifyRequest) {
+	/**
+	 * Returns an object with file path pointers for several temporary files used on song/score registering routes.
+	 * - - - -
+	 * @param {FastifyRequest} req The request instance of a route handler
+	 * @returns {Promise<FileRegisterTempPathsObject>}
+	 */
+	static async genFileRegisterTempPaths(req: FastifyRequest): Promise<FileRegisterTempPathsObject> {
 		const temp = req.server.fs.tempDir()
 		const uid = await this.genUniqueFilename()
 
